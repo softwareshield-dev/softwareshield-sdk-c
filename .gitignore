@@ -285,3 +285,5 @@ FakesAssemblies/
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
 
+# meson build-dirs
+output/
