@@ -1,13 +1,13 @@
 #include "GS5_Intf.h"
 
 #include <assert.h>
+#include <string>
 
 #ifdef _MSC_VER
 #include <Windows.h>
 #else
 #include <dlfcn.h>
 #include <stdio.h>
-#include <string>
 #endif
 
 namespace gs {
@@ -39,7 +39,32 @@ static bool resolveAPIs(void) {
     }
 
 #if defined(_WINDOWS_)
-    HMODULE h = LoadLibraryA("gsCore.dll");
+    const char* core_dll = "gsCore.dll";
+    HMODULE h = LoadLibraryA(core_dll);
+    if(!h){
+        //gsCore.dll is not in the dll search path.
+        //try searching environment variable "GS_SDK_BIN"
+        char* p = getenv("GS_SDK_BIN");
+        if(p){
+            char buf[MAX_PATH];
+            strncpy(buf, p, sizeof(buf));
+            int i = strlen(buf);
+            if(i < sizeof(buf)-1){
+                if(buf[i-1] != '/' && buf[i-1] != '\\'){
+                    buf[i] = '\\';
+                    buf[i+1] = 0;
+                }
+            }
+            //try GS_SDK_BIN/gsCore.dll
+            std::string dll_path = std::string(buf) + core_dll;
+            h = LoadLibraryA(dll_path.c_str());
+            if(!h){
+                //try GS_SDK_BIN/[win32|win64]/gsCore.dll
+                dll_path = std::string(buf) + (sizeof(p) == 4 ? "win32\\" : "win64\\") + core_dll;
+                h = LoadLibraryA(dll_path.c_str());
+            }
+        }
+    }
     if (h) {
         for (i = MIN_API_INDEX; i <= MAX_API_INDEX; i++) {
             apis[i] = GetProcAddress(h, (const char *)i);

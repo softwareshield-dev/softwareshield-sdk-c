@@ -8,13 +8,8 @@
 #ifndef _GS5_INTF_H_
 #define _GS5_INTF_H_
 
-#if defined(_MSC_VER) && (_MSC_VER <= 1500)
 //VC2008 does not support C99 standard, uses file downloaded from https://code.google.com/p/msinttypes/
-#include "msinttypes\stdint.h"
-#else
-#include <stdint.h>
-#endif
-
+#include <cstdint>
 #include <ctime>
 
 #ifdef __GNUC__

@@ -712,7 +712,7 @@ class TGSDynamicLM {
     static void WINAPI fcb_onDestroy(void *usrData);
 
   private:
-    std::auto_ptr<TGSLicense> _lic;
+    std::unique_ptr<TGSLicense> _lic;
 
     bool isValid_();
     void startAccess_();

@@ -312,7 +312,7 @@ void TGSDynamicLM::finishAccess_() {
 }
 
 void TGSDynamicLM::onAction_(TActionHandle hAct) {
-    std::auto_ptr<TGSAction> act(new TGSAction(hAct));
+    std::unique_ptr<TGSAction> act(new TGSAction(hAct));
     onAction(act.get());
 }
 //Initialize the instance (init properties, etc.)

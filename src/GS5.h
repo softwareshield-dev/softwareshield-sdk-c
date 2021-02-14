@@ -426,6 +426,7 @@ class TGSRequest : public TGSObject {
 class TGSEntity : public TGSObject {
   public:
     TGSEntity(gs_handle_t handle) : TGSObject(handle) {}
+    virtual ~TGSEntity() = default;
 
     //****** Licensing Status *****
     ///Is Entity accessible? (Passed attached license(s) verfication)

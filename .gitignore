@@ -287,3 +287,5 @@ _Pvt_Extensions
 
 # meson build-dirs
 output/
+
+.vscode/
