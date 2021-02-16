@@ -1,13 +1,17 @@
 #include "GS5_Intf.h"
 
 #include <assert.h>
+#include <stdexcept>
+#include <string.h>
 #include <string>
 
 #ifdef _MSC_VER
 #include <Windows.h>
 #else
 #include <dlfcn.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #endif
 
 namespace gs {
@@ -15,50 +19,41 @@ namespace gs {
 #define MIN_API_INDEX 2
 #define MAX_API_INDEX 162
 
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
-
 static void *apis[MAX_API_INDEX + 1];
 
-#ifndef _WINDOWS_
-//Unix: image base of gsCore
-static void *s_core = NULL;
-#endif
+//: image base of gsCore
+static void *s_core = nullptr;
 
 //Resolve all gsCore apis dynamically, must be called before any other apis
-static bool resolveAPIs(void) {
+static void resolveAPIs(void) {
     static bool inited = false;
     if (inited)
-        return true;
+        return;
 
-    int i;
+    memset(apis, 0, sizeof(apis));
 
-    for (i = MIN_API_INDEX; i <= MAX_API_INDEX; i++) {
-        apis[i] = NULL;
-    }
+#if defined(_WINDOWS_) || defined(_WIN_)
 
-#if defined(_WINDOWS_)
-    const char* core_dll = "gsCore.dll";
+    const char *core_dll = "gsCore.dll";
     HMODULE h = LoadLibraryA(core_dll);
-    if(!h){
+    if (!h) {
         //gsCore.dll is not in the dll search path.
         //try searching environment variable "GS_SDK_BIN"
-        char* p = getenv("GS_SDK_BIN");
-        if(p){
+        char *p = getenv("GS_SDK_BIN");
+        if (p) {
             char buf[MAX_PATH];
             strncpy(buf, p, sizeof(buf));
             int i = strlen(buf);
-            if(i < sizeof(buf)-1){
-                if(buf[i-1] != '/' && buf[i-1] != '\\'){
+            if (i < sizeof(buf) - 1) {
+                if (buf[i - 1] != '/' && buf[i - 1] != '\\') {
                     buf[i] = '\\';
-                    buf[i+1] = 0;
+                    buf[i + 1] = 0;
                 }
             }
             //try GS_SDK_BIN/gsCore.dll
             std::string dll_path = std::string(buf) + core_dll;
             h = LoadLibraryA(dll_path.c_str());
-            if(!h){
+            if (!h) {
                 //try GS_SDK_BIN/[win32|win64]/gsCore.dll
                 dll_path = std::string(buf) + (sizeof(p) == 4 ? "win32\\" : "win64\\") + core_dll;
                 h = LoadLibraryA(dll_path.c_str());
@@ -66,13 +61,15 @@ static bool resolveAPIs(void) {
         }
     }
     if (h) {
-        for (i = MIN_API_INDEX; i <= MAX_API_INDEX; i++) {
+        for (int i = MIN_API_INDEX; i <= MAX_API_INDEX; i++) {
             apis[i] = GetProcAddress(h, (const char *)i);
         }
     }
-#else
+    s_core = h;
+#elif defined(_MAC_)
+
+    void *h = nullptr;
     //Mac wrapped core, if loaded, will set its image base in environment
-    void *h = NULL;
     char *p = getenv("GS_CORE_BASE");
     if (p) {
         //Already loaded in memory p;
@@ -88,23 +85,51 @@ static bool resolveAPIs(void) {
             std::string this_module = (const char *)realpath(di.dli_fname, buf);
             size_t i = this_module.find_last_of('/');
             buf[i + 1] = 0;
-            strcat(buf, core);
+            strncat(buf, core, sizeof(buf));
         } else {
-            strcpy(buf, core);
+            strbcpy(buf, core, sizeof(buf));
         }
 
         printf("Loading Core lib [%s]...\n", buf);
         h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
-        if (h == NULL) {
+        if (h == nullptr) {
             printf("ERROR: cannot load core lib [%s], abort!\n", buf);
             exit(-1);
         }
     }
 
     s_core = h;
+#elif defined(_LINUX_)
+    const char *core = "libgsCore.so";
+    void *h = dlopen(core, RTLD_LAZY | RTLD_LOCAL);
+    if (!h) {
+        //sdk core cannot be loaded in standard way, try searching it side by side
+        //with current executable
+        char buf[4096];
+
+        Dl_info di;
+        if (dladdr(&apis, &di)) {
+            std::string this_module = (const char *)realpath(di.dli_fname, buf);
+            size_t i = this_module.find_last_of('/');
+            buf[i + 1] = 0;
+            strncat(buf, core, sizeof(buf));
+        } else {
+            strncpy(buf, core, sizeof(buf));
+        }
+
+        printf("Loading Core lib [%s]...\n", buf);
+        h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
+    }
+    s_core = h;
+#else
+#error("Either _WIN_, _LINUX_ or _MAC_ must be defined to build SoftwareShield SDK-C!")
 #endif
     inited = true;
-    return h != NULL;
+
+    if (s_core == nullptr) {
+        fprintf(stderr, "gsCore cannot be loaded!\n");
+        exit(-1);
+    }
 }
 
 #ifdef _WINDOWS_
@@ -116,11 +141,10 @@ static bool resolveAPIs(void) {
 #else
 //Unix..
 void resolveApi(int ord, const char *apiName) {
-    if (NULL == s_core)
+    if (nullptr == s_core)
         resolveAPIs();
-    assert(s_core);
 
-    if (NULL == apis[ord]) {
+    if (nullptr == apis[ord]) {
         apis[ord] = dlsym(s_core, apiName);
     }
     assert(apis[ord]);
@@ -160,142 +184,146 @@ void resolveApi(int ord, const char *apiName) {
     }
 
 BIND_FUNC(3, int, gsInit, const char *productId, const char *origLic, const char *password, void *reserved)
-productId, origLic, password, reserved BIND_END
+    productId, origLic, password, reserved 
+BIND_END
 
-                                  BIND_FUNC(103, int, gsInit, const char *productId, const unsigned char *origLicData, int licSize, const char *password, void *reserved) productId,
-    origLicData, licSize, password, reserved BIND_END
+BIND_FUNC(103, int, gsInitEx, const char *productId, const unsigned char *origLicData, int licSize, const char *password, void *reserved) 
+    productId, origLicData, licSize, password, reserved 
+BIND_END
 
-    BIND_FUNC0(4, int, gsCleanUp)
+int gsInit(const char *productId, const unsigned char *origLicData, int licSize, const char *password, void *reserved){
+  return gsInitEx(productId, origLicData, licSize, password, reserved);
+}
+BIND_FUNC0(4, int, gsCleanUp)
 
-        BIND_FUNC0(2, const char *, gsGetVersion)
+BIND_FUNC0(2, const char *, gsGetVersion)
 
-            BIND_PROC(5, gsCloseHandle, gs_handle_t handle) handle BIND_END
+BIND_PROC(5, gsCloseHandle, gs_handle_t handle) handle BIND_END
 
-    BIND_PROC0(6, gsFlush) BIND_FUNC0(7, const char *, gsGetLastErrorMessage) BIND_FUNC0(8, int, gsGetLastErrorCode)
+BIND_PROC0(6, gsFlush) 
+BIND_FUNC0(7, const char *, gsGetLastErrorMessage) 
+BIND_FUNC0(8, int, gsGetLastErrorCode)
 
-        BIND_PROC(104, gsSetLastErrorInfo, int errCode, const char *errMsg) errCode,
-    errMsg
-    BIND_END
+BIND_PROC(104, gsSetLastErrorInfo, int errCode, const char *errMsg) 
+    errCode, errMsg
+BIND_END
 
-    BIND_FUNC0(9, int, gsGetBuildId)
-        BIND_FUNC0(84, const char *, gsGetProductName)
-            BIND_FUNC0(85, const char *, gsGetProductId)
-    //Entity
-    BIND_FUNC0(10, int, gsGetEntityCount)
+BIND_FUNC0(9, int, gsGetBuildId)
+BIND_FUNC0(84, const char *, gsGetProductName)
+BIND_FUNC0(85, const char *, gsGetProductId)
 
-        BIND_FUNC(11, TEntityHandle, gsOpenEntityByIndex, int index)
-            index
-    BIND_END
+//Entity
+BIND_FUNC0(10, int, gsGetEntityCount)
 
-    BIND_FUNC(12, TEntityHandle, gsOpenEntityById, entity_id_t entityId)
-        entityId
-    BIND_END
-
-    BIND_FUNC(13, unsigned int, gsGetEntityAttributes, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(14, entity_id_t, gsGetEntityId, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(15, const char *, gsGetEntityName, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(16, const char *, gsGetEntityDescription, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(20, bool, gsBeginAccessEntity, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(21, bool, gsEndAccessEntity, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    //License
-    BIND_FUNC(25, int, gsGetLicenseCount, TEntityHandle hEntity)
-        hEntity
-    BIND_END
-
-    BIND_FUNC(26, TLicenseHandle, gsOpenLicenseByIndex, TEntityHandle hEntity, int index)
-        hEntity,
+BIND_FUNC(11, TEntityHandle, gsOpenEntityByIndex, int index)
     index
-    BIND_END
+BIND_END
 
-    BIND_FUNC(27, TLicenseHandle, gsOpenLicenseById, TEntityHandle hEntity, license_id_t licenseId)
-        hEntity,
-    licenseId
-    BIND_END
-    /*
+BIND_FUNC(12, TEntityHandle, gsOpenEntityById, entity_id_t entityId)
+    entityId
+BIND_END
+
+BIND_FUNC(13, unsigned int, gsGetEntityAttributes, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(14, entity_id_t, gsGetEntityId, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(15, const char *, gsGetEntityName, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(16, const char *, gsGetEntityDescription, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(20, bool, gsBeginAccessEntity, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(21, bool, gsEndAccessEntity, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+//License
+BIND_FUNC(25, int, gsGetLicenseCount, TEntityHandle hEntity)
+    hEntity
+BIND_END
+
+BIND_FUNC(26, TLicenseHandle, gsOpenLicenseByIndex, TEntityHandle hEntity, int index)
+    hEntity, index
+BIND_END
+
+BIND_FUNC(27, TLicenseHandle, gsOpenLicenseById, TEntityHandle hEntity, license_id_t licenseId)
+    hEntity, licenseId
+BIND_END
+/*
 * Inspect the license model's status
 */
-    BIND_FUNC(28, license_id_t, gsGetLicenseId, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(28, license_id_t, gsGetLicenseId, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(22, const char *, gsGetLicenseName, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(22, const char *, gsGetLicenseName, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(23, const char *, gsGetLicenseDescription, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(23, const char *, gsGetLicenseDescription, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(24, TLicenseStatus, gsGetLicenseStatus, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(24, TLicenseStatus, gsGetLicenseStatus, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(34, bool, gsIsLicenseValid, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(34, bool, gsIsLicenseValid, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(48, TEntityHandle, gsGetLicensedEntity, TLicenseHandle hLic)
-        hLic
-    BIND_END
+BIND_FUNC(48, TEntityHandle, gsGetLicensedEntity, TLicenseHandle hLic)
+    hLic
+BIND_END
 
-    /*
+/*
 * Inspect the license model's parameters
 */
-    /// Get total number of parameters in a license.
-    BIND_FUNC(29, int, gsGetLicenseParamCount, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+/// Get total number of parameters in a license.
+BIND_FUNC(29, int, gsGetLicenseParamCount, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    /// Get the index'th parameter info handle
-    BIND_FUNC(30, TVarHandle, gsGetLicenseParamByIndex, TLicenseHandle hLicense, int index)
-        hLicense,
-    index
-    BIND_END
+/// Get the index'th parameter info handle
+BIND_FUNC(30, TVarHandle, gsGetLicenseParamByIndex, TLicenseHandle hLicense, int index)
+    hLicense, index
+BIND_END
 
-    BIND_FUNC(31, TVarHandle, gsGetLicenseParamByName, TLicenseHandle hLicense, const char *name)
-        hLicense,
-    name
-    BIND_END
+BIND_FUNC(31, TVarHandle, gsGetLicenseParamByName, TLicenseHandle hLicense, const char *name)
+    hLicense, name
+BIND_END
 
-    /**
+/**
  * Inspect license model's actions
  */
-    BIND_FUNC(32, int, gsGetActionInfoCount, TLicenseHandle hLicense)
-        hLicense
-    BIND_END
+BIND_FUNC(32, int, gsGetActionInfoCount, TLicenseHandle hLicense)
+    hLicense
+BIND_END
 
-    BIND_FUNC(33, const char *, gsGetActionInfoByIndex, TLicenseHandle hLicense, int index, action_id_t *actionId)
-        hLicense,
-    index, actionId BIND_END
+BIND_FUNC(33, const char *, gsGetActionInfoByIndex, TLicenseHandle hLicense, int index, action_id_t *actionId)
+    hLicense, index, actionId
+BIND_END
 
-    /**
-  *	Inspect an action
-  */
-    BIND_FUNC(38, const char *, gsGetActionName, TActionHandle hAct) hAct BIND_END
+/**
+ *	Inspect an action
+*/
+BIND_FUNC(38, const char *, gsGetActionName, TActionHandle hAct) hAct BIND_END
 
-    BIND_FUNC(39, action_id_t, gsGetActionId, TActionHandle hAct) hAct BIND_END
+BIND_FUNC(39, action_id_t, gsGetActionId, TActionHandle hAct) hAct BIND_END
 
-    BIND_FUNC(40, const char *, gsGetActionDescription, TActionHandle hAct) hAct BIND_END
+BIND_FUNC(40, const char *, gsGetActionDescription, TActionHandle hAct) hAct BIND_END
 
-    BIND_FUNC(41, const char *, gsGetActionString, TActionHandle hAct) hAct BIND_END
+BIND_FUNC(41, const char *, gsGetActionString, TActionHandle hAct) hAct BIND_END
 
     /**
    * Inspect action's parameters

@@ -64,7 +64,7 @@ class gs5_error : public std::exception {
     int code() const { return _code; }
 
 #ifndef _MSC_VER
-    virtual const char *what() const {
+    virtual const char *what() const throw() {
         return _msg.c_str();
     }
 #endif
