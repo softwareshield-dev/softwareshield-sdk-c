@@ -103,22 +103,45 @@ static void resolveAPIs(void) {
     const char *core = "libgsCore.so";
     void *h = dlopen(core, RTLD_LAZY | RTLD_LOCAL);
     if (!h) {
+        char buf[4096];
+        //try searching environment variable "GS_SDK_BIN"
+        char *p = getenv("GS_SDK_BIN");
+        if (p) {
+            strncpy(buf, p, sizeof(buf));
+            size_t i = strlen(buf);
+            if (i < sizeof(buf) - 1) {
+                if (buf[i - 1] != '/') {
+                    buf[i] = '/';
+                    buf[i + 1] = 0;
+                }
+            }
+            //try GS_SDK_BIN/libgsCore.so
+            std::string dll_path = std::string(buf) + core;
+            h = dlopen(dll_path.c_str(), RTLD_LAZY | RTLD_LOCAL);
+    
+            if (!h) {
+                //try GS_SDK_BIN/[win32|win64]/gsCore.dll
+                dll_path = std::string(buf) + (sizeof(p) == 4 ? "linux32/" : "linux64/") + core;
+                h = dlopen(dll_path.c_str(), RTLD_LAZY | RTLD_LOCAL);
+            }
+        }
         //sdk core cannot be loaded in standard way, try searching it side by side
         //with current executable
-        char buf[4096];
 
-        Dl_info di;
-        if (dladdr(&apis, &di)) {
-            std::string this_module = (const char *)realpath(di.dli_fname, buf);
-            size_t i = this_module.find_last_of('/');
-            buf[i + 1] = 0;
-            strncat(buf, core, sizeof(buf));
-        } else {
-            strncpy(buf, core, sizeof(buf));
+        if(!h){
+            Dl_info di;
+            if (dladdr(&apis, &di)) {
+                std::string this_module = (const char *)realpath(di.dli_fname, buf);
+                size_t i = this_module.find_last_of('/');
+                buf[i + 1] = 0;
+                strncat(buf, core, sizeof(buf));
+            } else {
+                strncpy(buf, core, sizeof(buf));
+            }
+
+            printf("Loading Core lib [%s]...\n", buf);
+            h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
         }
-
-        printf("Loading Core lib [%s]...\n", buf);
-        h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
     }
     s_core = h;
 #else
