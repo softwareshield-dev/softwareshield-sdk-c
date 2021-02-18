@@ -32,7 +32,7 @@ void test_callback(bool start) {
         clean_license();
     } else {
         printf("exiting...\n");
-        core->cleanUp();
+        TGSCore::finish();
     }
 }
 

@@ -23,6 +23,22 @@ static void *apis[MAX_API_INDEX + 1];
 
 //: image base of gsCore
 static void *s_core = nullptr;
+static bool s_finished = false;
+
+
+void sdk_finish(){
+    if(s_finished) return;
+    s_finished = true;
+
+    if(s_core){
+#if defined(_WINDOWS_) || defined(_WIN_)
+        FreeLibrary((HMODULE)s_core);
+#elif defined(_MAC_) || defined(_LINUX_)
+        dlclose(s_core);
+#endif
+        s_core = nullptr;
+    }
+}
 
 //Resolve all gsCore apis dynamically, must be called before any other apis
 static void resolveAPIs(void) {

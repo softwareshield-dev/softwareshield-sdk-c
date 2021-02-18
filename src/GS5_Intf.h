@@ -371,6 +371,9 @@ typedef void(WINAPI *lm_onAction_callback)(TActionHandle hAction, void *usrData)
 typedef void(WINAPI *lm_destroy_callback)(void *usrData);
 typedef gs_handle_t(WINAPI *lm_create_callback)(void *usrData);
 
+// the last api called to explicitly release the internal resources used by SDK
+void sdk_finish();
+
 /**
    * \brief One-time Initialization of gsCore
    *

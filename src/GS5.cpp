@@ -482,9 +482,9 @@ TGSCore::~TGSCore() {
     cleanUp();
 }
 
-static TGSCore *s_core = NULL;
+static TGSCore *s_core = nullptr;
 TGSCore *TGSCore::getInstance() {
-    if (s_core == NULL) {
+    if (s_core == nullptr) {
         s_core = new TGSCore();
     }
     return s_core;
@@ -492,13 +492,11 @@ TGSCore *TGSCore::getInstance() {
 
 void TGSCore::finish() {
     if (s_core) {
-        TGSCore *p = s_core;
-        s_core = NULL;
-
-        if (p) {
-            delete p;
-        }
+        s_core->cleanUp();
+        delete s_core;
+        s_core = nullptr;
     }
+    sdk_finish();
 }
 
 int TGSCore::cleanUp() {
