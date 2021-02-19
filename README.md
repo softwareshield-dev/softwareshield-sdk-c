@@ -76,15 +76,18 @@ When debugging your licensed app, the SDK binary (on Winodws: gsCore.dll, on Mac
 * setup environment variable **GS_SDK_BIN** to the folder where the gsCore is deployed.
 ```
 ${GS_SDK_BIN}
-    ├── gsCore.dll
+    ├── gsCore.dll   (on Windows)
+    ├── libgsCore.so (on Linux)
 ```
 
   If your app sources compiles in both 32bit and 64 bit, the gsCore can be deployed as following layout:
 
 ```
 ${GS_SDK_BIN}
-    ├───win32/: gsCore.dll
-    ├───win64/: gsCore.dll
+    ├───win32/: gsCore.dll  (on Windows)
+    ├───win64/: gsCore.dll  (on Windows)
+    ├───linux32/: libgsCore.so (on Linux)
+    ├───linux64/: libgsCore.so (on Linux)
 ```
 
 ## Should I deploy the SDK binary as part of my app release?
