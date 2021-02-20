@@ -2,6 +2,7 @@
 
 #include "on-exit.h"
 #include "params.h"
+#include "helpers.h"
 
 #include <iostream>
 
@@ -9,6 +10,26 @@
 using namespace gs;
 
 namespace licman {
+namespace {
+std::string getEntityAttrString(unsigned int attr) {
+    std::string result;
+    if (attr & ENTITY_ATTRIBUTE_ACCESSIBLE)
+        result = "ACCESSIBLE";
+    else
+        result = "NOT_ACCESSIBLE";
+
+    if (attr & ENTITY_ATTRIBUTE_ACCESSING)
+        result = result.empty() ? "ACCESSING" : result + " | ACCESSING";
+    if (attr & ENTITY_ATTRIBUTE_LOCKED)
+        result = result.empty() ? "LOCKED" : result + " | LOCKED";
+    if (attr & ENTITY_ATTRIBUTE_UNLOCKED)
+        result = result.empty() ? "UNLOCKED" : result + " | UNLOCKED";
+    if (attr & ENTITY_ATTRIBUTE_AUTOSTART)
+        result = result.empty() ? "AUTOSTART" : result + " | AUTOSTART";
+    return result;
+}
+
+} // namespace
 int displayCurrentLicenseStatus() {
 
     if (productId.empty())
@@ -24,10 +45,30 @@ int displayCurrentLicenseStatus() {
         return -1;
     }
 
-    std::cout << "SDK initialized successfully" << std::endl;
+    std::clog << "SDK initialized successfully" << std::endl
+              << std::endl;
+
+    //Dump entity details
+    int total_entities = core->getTotalEntities();
+    std::cout << "Total Entities: " << total_entities << std::endl
+              << std::string(18, '=') << std::endl;
+    for (int i = 0; i < total_entities; i++) {
+        std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
+
+        std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id();
+        auto attr = entity->attribute();
+        std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << std::endl;
+        std::cout << std::endl;
+
+        //license
+        if(!entity->hasLicense()) continue;
+
+        std::unique_ptr<TGSLicense> lic(entity->getLicense());
+    }
 
     ON_EXIT(
-        std::cout << "exiting..." << std::endl;
+        std::clog << std::endl
+                  << "exiting..." << std::endl;
         TGSCore::finish(););
 
     return 0;

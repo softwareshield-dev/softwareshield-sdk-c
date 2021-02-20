@@ -8,6 +8,8 @@ namespace licman {
 extern std::string productId;         // unique product-id
 extern std::string password;          // license password
 extern std::filesystem::path origLic; //path to original license
+
+extern bool verbose;
 } // namespace licman
 
 #endif

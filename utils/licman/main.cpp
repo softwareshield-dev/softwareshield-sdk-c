@@ -1,27 +1,30 @@
 #include <cxxopts.hpp>
 #include <iostream>
 
-#include "params.h"
 #include "cmd-status.h"
+#include "params.h"
+#include "helpers.h"
 
 #include <GS5.h>
 using namespace gs;
 
+
 int main(int argc, char *args[]) {
     cxxopts::Options opt("licman", "SoftwareShield License Management Utility");
 
-    opt.add_options()("h,help", "Print usage")("version", "show SDK version")
+    opt.add_options()("h,help", "Print usage")("v,verbose", "show more details")("version", "show SDK version")
         //common params
-        ("productid", "product-id of the license data", cxxopts::value<std::string>())
-        ("password", "password to decode license data", cxxopts::value<std::string>())
-        ("origlic", "path to original compiled license file (*.lic)", cxxopts::value<std::string>())
-        ("s,status", "show current license status");
+        ("productid", "product-id of the license data", cxxopts::value<std::string>())("password", "password to decode license data", cxxopts::value<std::string>())("origlic", "path to original compiled license file (*.lic)", cxxopts::value<std::string>())("s,status", "show current license status");
 
     auto result = opt.parse(argc, args);
 
     if (result.arguments().empty() || result.count("help")) {
         std::cout << opt.help() << std::endl;
         return 0;
+    }
+
+    if (result.count("verbose")) {
+        licman::verbose = true;
     }
 
     try {
@@ -43,12 +46,13 @@ int main(int argc, char *args[]) {
                 throw std::invalid_argument("original license file cannot be found!");
         }
         //show license information
-        if(result.count("status")){
+        if (result.count("status")) {
             return licman::displayCurrentLicenseStatus();
-        } 
+        }
     } catch (std::exception &ex) {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
+        std::cerr << ERROR(ex.what()) << std::endl;
     }
 
+    
     return -1;
 }
