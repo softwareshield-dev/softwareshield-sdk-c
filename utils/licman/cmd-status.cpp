@@ -35,14 +35,14 @@ std::string getEntityAttrString(unsigned int attr) {
 const char *mode_strs[3] = {"VALID_SINCE", "EXPIRE_AFTER", "VALID_RANGE"};
 
 void dumpDateTime(const char *name, time_point_t tp) {
-    std::cout << KEYWORD(name) << ": " << gs::to_simple_string(tp) <<  " (" << std::chrono::system_clock::to_time_t(tp) << ")" << BR;
+    std::cout << KEYWORD(name) << ": " << gs::to_simple_string(tp) << " (" << std::chrono::system_clock::to_time_t(tp) << ")" << BR;
 }
 
-void dumpLM(TLM_Inspector& lm){
+void dumpLM(TLM_Inspector &lm) {
     std::cout << KEYWORD("status") << ": " << lm.status() << PR;
 }
 
-void dumpLMExpire(TLM_Expire& lm){
+void dumpLMExpire(TLM_Expire &lm) {
     dumpLM(lm);
 
     std::cout << KEYWORD("exit-app-on-expire") << ": " << lm.exitAppOnExpire() << PR;
@@ -74,15 +74,19 @@ void dumpLMHardDate(TGSLicense *lic) {
 }
 void dumpLMSession(TGSLicense *lic) {
     TLM_Session lm(lic);
+    dumpLMExpire(lm);
 }
 void dumpLMDuration(TGSLicense *lic) {
     TLM_Duration lm(lic);
+    dumpLMExpire(lm);
 }
 void dumpLMPeriod(TGSLicense *lic) {
     TLM_Period lm(lic);
+    dumpLMExpire(lm);
 }
 void dumpLMAccessTime(TGSLicense *lic) {
     TLM_Access lm(lic);
+    dumpLMExpire(lm);
 }
 void dumpLMAlwaysRun(TGSLicense *lic) {
     TLM_Run lm(lic);
@@ -155,7 +159,7 @@ int displayCurrentLicenseStatus() {
             std::cerr << ERROR("license type not supported!") << BR;
         }
 
-        std::cout << HR;
+        std::cout << PR << KEYWORD("unlock request-code: ") << lic->getUnlockRequestCode() << HR;
     }
 
     return 0;
