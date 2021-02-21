@@ -29,7 +29,7 @@ int main(int argc, char *args[]) {
 
     try {
         if (result.count("version")) {
-            std::cout << "SDK version: " << TGSCore::SDKVersion() << std::endl;
+            std::cout << KEYWORD("SDK version: ") << TGSCore::SDKVersion() << std::endl;
             return 0;
         }
 

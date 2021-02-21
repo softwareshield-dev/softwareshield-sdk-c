@@ -1101,22 +1101,6 @@ class TGSCore {
     }
 };
 
-/**
-  *  Built-In License Model Inspectors
-  *
-  *  An inspector encapsulates LM-specific functions into a helper class, otherwise you have to access a LM via TGSLicense ( a generic way)
-  *
-  */
-class TLM_Inspector {
-  protected:
-    TGSLicense *_lic; //License being inspected
-  public:
-};
-
-/// LM_Expire_Period Inspector
-class TLM_Period : public TLM_Inspector {
-};
-
 //Debug Helper
 //Ouput debug message
 #if defined(DEBUG) || defined(_DEBUG)

@@ -1,12 +1,15 @@
 #include "cmd-status.h"
 
+#include "helpers.h"
 #include "on-exit.h"
 #include "params.h"
-#include "helpers.h"
 
 #include <iostream>
+#include <map>
 
 #include <GS5.h>
+#include <GS5_Inspector.h>
+
 using namespace gs;
 
 namespace licman {
@@ -29,6 +32,61 @@ std::string getEntityAttrString(unsigned int attr) {
     return result;
 }
 
+const char *mode_strs[3] = {"VALID_SINCE", "EXPIRE_AFTER", "VALID_RANGE"};
+
+void dumpLMHardDate(TGSLicense *lic) {
+    TLM_HardDate lm(lic);
+
+    auto mode = lm.mode();
+    std::cout << KEYWORD("mode") << ": " << mode_strs[(int)mode] << BR;
+    switch (mode) {
+    case TLM_HardDate::Mode::VALID_SINCE: {
+        std::cout << KEYWORD("time-begin") << ": " << gs::to_simple_string(lm.timeBegin()) << BR;
+        break;
+    }
+    case TLM_HardDate::Mode::EXPIRE_AFTER: {
+        std::cout << KEYWORD("time-end") << ": " << gs::to_simple_string(lm.timeEnd()) << BR;
+        break;
+    }
+    case TLM_HardDate::Mode::VALID_RANGE: {
+        std::cout << KEYWORD("time-begin") << ": " << gs::to_simple_string(lm.timeBegin()) << BR;
+        std::cout << KEYWORD("time-end") << ": " << gs::to_simple_string(lm.timeEnd()) << BR;
+        break;
+    }
+    }
+
+    std::cout << BR << KEYWORD("rollback-tolerance") << ": " << lm.rollbackTolerance() << " (seconds)" << BR;
+    std::cout << KEYWORD("exit-app-on-expire") << ": " << lm.exitAppOnExpire() << BR;
+}
+void dumpLMSession(TGSLicense *lic) {
+    TLM_Session lm(lic);
+}
+void dumpLMDuration(TGSLicense *lic) {
+    TLM_Duration lm(lic);
+}
+void dumpLMPeriod(TGSLicense *lic) {
+    TLM_Period lm(lic);
+}
+void dumpLMAccessTime(TGSLicense *lic) {
+    TLM_Access lm(lic);
+}
+void dumpLMAlwaysRun(TGSLicense *lic) {
+    TLM_Run lm(lic);
+}
+void dumpLMAlwaysLock(TGSLicense *lic) {
+    TLM_Lock lm(lic);
+}
+
+using dump_func_t = std::function<void(TGSLicense *)>;
+std::map<std::string, dump_func_t> dumps{
+    {"gs.lm.expire.hardDate.1", dumpLMHardDate},
+    {"gs.lm.expire.accessTime.1", dumpLMAccessTime},
+    {"gs.lm.expire.period.1", dumpLMPeriod},
+    {"gs.lm.expire.duration.1", dumpLMDuration},
+    {"gs.lm.expire.sessionTime.1", dumpLMSession},
+    {"gs.lm.alwaysRun.1", dumpLMAlwaysRun},
+    {"gs.lm.alwaysLock.1", dumpLMAlwaysLock}};
+
 } // namespace
 int displayCurrentLicenseStatus() {
 
@@ -50,6 +108,8 @@ int displayCurrentLicenseStatus() {
 
     //Dump entity details
     int total_entities = core->getTotalEntities();
+    std::cout << H1("Current License Status");
+
     std::cout << "Total Entities: " << total_entities << std::endl
               << std::string(18, '=') << std::endl;
     for (int i = 0; i < total_entities; i++) {
@@ -57,13 +117,31 @@ int displayCurrentLicenseStatus() {
 
         std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id();
         auto attr = entity->attribute();
-        std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << std::endl;
-        std::cout << std::endl;
+        if (verbose) {
+            std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << std::endl;
+        } else {
+            std::cout << KEYWORD(" attribute: ") << getEntityAttrString(attr) << std::endl;
+        }
 
         //license
-        if(!entity->hasLicense()) continue;
+        if (!entity->hasLicense())
+            continue;
+
+        std::cout << H3("License");
 
         std::unique_ptr<TGSLicense> lic(entity->getLicense());
+        std::string id = lic->id();
+
+        std::cout << KEYWORD("type: ") << id << std::endl;
+
+        //display license status
+        if (auto it = dumps.find(id); it != dumps.end()) {
+            it->second(lic.get());
+        } else {
+            std::cerr << ERROR("license type not supported!") << std::endl;
+        }
+
+        std::cout << HR;
     }
 
     ON_EXIT(
