@@ -4,6 +4,7 @@
 #include "rang.hpp"
 
 #include <ctime>
+#include <iostream>
 
 template<typename T>
 inline int length(T v){
@@ -31,6 +32,8 @@ template<> inline int length(std::string v){
 
 namespace licman {
     //render helpers
+    bool initSDK();
+    void finishSDK();
 }
 
 #endif

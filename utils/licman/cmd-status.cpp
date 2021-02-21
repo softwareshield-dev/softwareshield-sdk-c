@@ -1,10 +1,8 @@
 #include "cmd-status.h"
 
 #include "helpers.h"
-#include "on-exit.h"
 #include "params.h"
 
-#include <iostream>
 #include <map>
 
 #include <GS5.h>
@@ -107,24 +105,7 @@ std::map<std::string, dump_func_t> dumps{
 
 } // namespace
 int displayCurrentLicenseStatus() {
-
-    if (productId.empty())
-        throw std::invalid_argument("product-id must be specified (by \"--productid\")!");
-    if (password.empty())
-        throw std::invalid_argument("password must be specified (by \"--password\")!");
-    if (origLic.empty())
-        throw std::invalid_argument("original license must be specified (by \"--origlic\") !");
-
-    auto core = TGSCore::getInstance();
-    if (!core->init(productId.c_str(), origLic.c_str(), password.c_str())) {
-        std::cerr << "SDK initialize failure, err code: " << core->lastErrorCode() << "err: " << core->lastErrorMessage() << PR;
-        return -1;
-    }
-
-    std::clog << "SDK initialized successfully" << PR;
-
-    ON_EXIT(std::clog << BR << "exiting..." << BR; TGSCore::finish(););
-
+    auto core = gs::TGSCore::getInstance();
     //Dump entity details
     int total_entities = core->getTotalEntities();
     std::cout << H1("Current License Status");
