@@ -34,29 +34,43 @@ std::string getEntityAttrString(unsigned int attr) {
 
 const char *mode_strs[3] = {"VALID_SINCE", "EXPIRE_AFTER", "VALID_RANGE"};
 
+void dumpDateTime(const char *name, time_point_t tp) {
+    std::cout << KEYWORD(name) << ": " << gs::to_simple_string(tp) <<  " (" << std::chrono::system_clock::to_time_t(tp) << ")" << BR;
+}
+
+void dumpLM(TLM_Inspector& lm){
+    std::cout << KEYWORD("status") << ": " << lm.status() << PR;
+}
+
+void dumpLMExpire(TLM_Expire& lm){
+    dumpLM(lm);
+
+    std::cout << KEYWORD("exit-app-on-expire") << ": " << lm.exitAppOnExpire() << PR;
+}
 void dumpLMHardDate(TGSLicense *lic) {
+
     TLM_HardDate lm(lic);
+    dumpLMExpire(lm);
 
     auto mode = lm.mode();
     std::cout << KEYWORD("mode") << ": " << mode_strs[(int)mode] << BR;
     switch (mode) {
     case TLM_HardDate::Mode::VALID_SINCE: {
-        std::cout << KEYWORD("time-begin") << ": " << gs::to_simple_string(lm.timeBegin()) << BR;
+        dumpDateTime("time-begin", lm.timeBegin());
         break;
     }
     case TLM_HardDate::Mode::EXPIRE_AFTER: {
-        std::cout << KEYWORD("time-end") << ": " << gs::to_simple_string(lm.timeEnd()) << BR;
+        dumpDateTime("time-end", lm.timeEnd());
         break;
     }
     case TLM_HardDate::Mode::VALID_RANGE: {
-        std::cout << KEYWORD("time-begin") << ": " << gs::to_simple_string(lm.timeBegin()) << BR;
-        std::cout << KEYWORD("time-end") << ": " << gs::to_simple_string(lm.timeEnd()) << BR;
+        dumpDateTime("time-begin", lm.timeBegin());
+        dumpDateTime("time-end", lm.timeEnd());
         break;
     }
     }
 
     std::cout << BR << KEYWORD("rollback-tolerance") << ": " << lm.rollbackTolerance() << " (seconds)" << BR;
-    std::cout << KEYWORD("exit-app-on-expire") << ": " << lm.exitAppOnExpire() << BR;
 }
 void dumpLMSession(TGSLicense *lic) {
     TLM_Session lm(lic);
@@ -99,28 +113,28 @@ int displayCurrentLicenseStatus() {
 
     auto core = TGSCore::getInstance();
     if (!core->init(productId.c_str(), origLic.c_str(), password.c_str())) {
-        std::cerr << "SDK initialize failure, err code: " << core->lastErrorCode() << "err: " << core->lastErrorMessage() << std::endl;
+        std::cerr << "SDK initialize failure, err code: " << core->lastErrorCode() << "err: " << core->lastErrorMessage() << PR;
         return -1;
     }
 
-    std::clog << "SDK initialized successfully" << std::endl
-              << std::endl;
+    std::clog << "SDK initialized successfully" << PR;
+
+    ON_EXIT(std::clog << BR << "exiting..." << BR; TGSCore::finish(););
 
     //Dump entity details
     int total_entities = core->getTotalEntities();
     std::cout << H1("Current License Status");
 
-    std::cout << "Total Entities: " << total_entities << std::endl
-              << std::string(18, '=') << std::endl;
+    std::cout << "Total Entities: " << total_entities << BR << std::string(18, '=') << BR;
     for (int i = 0; i < total_entities; i++) {
         std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
 
         std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id();
         auto attr = entity->attribute();
         if (verbose) {
-            std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << std::endl;
+            std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << BR;
         } else {
-            std::cout << KEYWORD(" attribute: ") << getEntityAttrString(attr) << std::endl;
+            std::cout << KEYWORD(" attribute: ") << getEntityAttrString(attr) << BR;
         }
 
         //license
@@ -132,22 +146,17 @@ int displayCurrentLicenseStatus() {
         std::unique_ptr<TGSLicense> lic(entity->getLicense());
         std::string id = lic->id();
 
-        std::cout << KEYWORD("type: ") << id << std::endl;
+        std::cout << KEYWORD("type: ") << id << BR;
 
         //display license status
         if (auto it = dumps.find(id); it != dumps.end()) {
             it->second(lic.get());
         } else {
-            std::cerr << ERROR("license type not supported!") << std::endl;
+            std::cerr << ERROR("license type not supported!") << BR;
         }
 
         std::cout << HR;
     }
-
-    ON_EXIT(
-        std::clog << std::endl
-                  << "exiting..." << std::endl;
-        TGSCore::finish(););
 
     return 0;
 }

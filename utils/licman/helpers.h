@@ -23,6 +23,7 @@ template<> inline int length(std::string v){
 
 #define HR std::endl << std::endl << std::endl
 #define BR std::endl
+#define PR std::endl << std::endl
 
 #define KEYWORD(key) rang::style::bold << (key) << rang::style::reset
 
