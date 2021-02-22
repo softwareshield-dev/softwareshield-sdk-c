@@ -492,6 +492,7 @@ TGSCore *TGSCore::getInstance() {
 
 void TGSCore::finish() {
     if (s_core) {
+        s_core->flush();
         s_core->cleanUp();
         delete s_core;
         s_core = nullptr;
