@@ -108,12 +108,12 @@ int main(int argc, char *args[]) {
             if (sum > 0) {
                 std::cout << KEYWORD("total locked entities") << ": " << sum << BR;
             } else {
-                std::cout << ERROR("no entity name matches, lock ignored.") << BR;
+                std::cout << ERR("no entity name matches, lock ignored.") << BR;
             }
             return 0;
         }
     } catch (std::exception &ex) {
-        std::cerr << ERROR(ex.what()) << std::endl;
+        std::cerr << ERR(ex.what()) << std::endl;
     }
 
     return -1;

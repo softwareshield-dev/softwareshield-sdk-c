@@ -19,7 +19,7 @@ bool initSDK() {
         throw std::invalid_argument("original license must be specified (by \"--origlic\") !");
 
     auto core = gs::TGSCore::getInstance();
-    if (!core->init(productId.c_str(), origLic.c_str(), password.c_str())) {
+    if (!core->init(productId.c_str(), origLic.string().c_str(), password.c_str())) {
         std::cerr << "SDK initialize failure, err code: " << core->lastErrorCode() << "err: " << core->lastErrorMessage() << PR;
         return false;
     }

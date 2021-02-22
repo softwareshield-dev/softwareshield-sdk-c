@@ -93,7 +93,8 @@ void dumpLMAlwaysLock(TGSLicense *lic) {
     TLM_Lock lm(lic);
 }
 
-using dump_func_t = std::function<void(TGSLicense *)>;
+typedef void (*dump_func_t)(TGSLicense*);
+
 std::map<std::string, dump_func_t> dumps{
     {"gs.lm.expire.hardDate.1", dumpLMHardDate},
     {"gs.lm.expire.accessTime.1", dumpLMAccessTime},
@@ -137,7 +138,7 @@ int displayCurrentLicenseStatus() {
         if (auto it = dumps.find(id); it != dumps.end()) {
             it->second(lic.get());
         } else {
-            std::cerr << ERROR("license type not supported!") << BR;
+            std::cerr << ERR("license type not supported!") << BR;
         }
 
         std::cout << PR << KEYWORD("unlock request-code: ") << lic->getUnlockRequestCode() << HR;
