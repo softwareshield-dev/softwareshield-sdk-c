@@ -49,30 +49,33 @@ static void resolveAPIs(void) {
     memset(apis, 0, sizeof(apis));
 
 #if defined(_WINDOWS_) || defined(_WIN_)
-
-    const char *core_dll = "gsCore.dll";
-    HMODULE h = LoadLibraryA(core_dll);
-    if (!h) {
-        //gsCore.dll is not in the dll search path.
-        //try searching environment variable "GS_SDK_BIN"
-        char *p = getenv("GS_SDK_BIN");
-        if (p) {
-            char buf[MAX_PATH];
-            strncpy(buf, p, sizeof(buf));
-            int i = strlen(buf);
-            if (i < sizeof(buf) - 1) {
-                if (buf[i - 1] != '/' && buf[i - 1] != '\\') {
-                    buf[i] = '\\';
-                    buf[i + 1] = 0;
+    HMODULE h = nullptr;
+    const char *core_dlls[2] = {"gsCore.dll", "gsCore-6.dll"};
+    for (int i = 0; !h && i < sizeof(core_dlls) / sizeof(core_dlls[0]); i++) {
+        const char* core_dll = core_dlls[i];
+        h = LoadLibraryA(core_dll);
+        if (!h) {
+            //gsCore.dll is not in the dll search path.
+            //try searching environment variable "GS_SDK_BIN"
+            char *p = getenv("GS_SDK_BIN");
+            if (p) {
+                char buf[MAX_PATH];
+                strncpy(buf, p, sizeof(buf));
+                int i = strlen(buf);
+                if (i < sizeof(buf) - 1) {
+                    if (buf[i - 1] != '/' && buf[i - 1] != '\\') {
+                        buf[i] = '\\';
+                        buf[i + 1] = 0;
+                    }
                 }
-            }
-            //try GS_SDK_BIN/gsCore.dll
-            std::string dll_path = std::string(buf) + core_dll;
-            h = LoadLibraryA(dll_path.c_str());
-            if (!h) {
-                //try GS_SDK_BIN/[win32|win64]/gsCore.dll
-                dll_path = std::string(buf) + (sizeof(p) == 4 ? "win32\\" : "win64\\") + core_dll;
+                //try GS_SDK_BIN/gsCore.dll
+                std::string dll_path = std::string(buf) + core_dll;
                 h = LoadLibraryA(dll_path.c_str());
+                if (!h) {
+                    //try GS_SDK_BIN/[win32|win64]/gsCore.dll
+                    dll_path = std::string(buf) + (sizeof(p) == 4 ? "win32\\" : "win64\\") + core_dll;
+                    h = LoadLibraryA(dll_path.c_str());
+                }
             }
         }
     }
@@ -197,18 +200,17 @@ void resolveApi(int ord, const char *apiName) {
     (__VA_ARGS__);     \
     }
 
-#define BIND_FUNC(ord, retType, apiName, ...)     \
+#define BIND_FUNC(ord, retType, apiName, ...)       \
     retType apiName(__VA_ARGS__) {                  \
         RESOLVE_API(ord, apiName);                  \
         typedef retType(WINAPI *Fapi)(__VA_ARGS__); \
         return (*(Fapi)apis[ord])FUNC_CALL
 
-#define BIND_PROC(ord, apiName, ...)            \
+#define BIND_PROC(ord, apiName, ...)              \
     void apiName(__VA_ARGS__) {                   \
         RESOLVE_API(ord, apiName);                \
         typedef void(WINAPI * Fapi)(__VA_ARGS__); \
         (*(Fapi)apis[ord]) FUNC_CALL
-
 
 #define BIND_PROC0(ord, apiName)       \
     void apiName() {                   \
@@ -301,8 +303,12 @@ BIND_FUNC(22, const char *, gsGetLicenseName, TLicenseHandle hLicense)
 BIND_FUNC(23, const char *, gsGetLicenseDescription, TLicenseHandle hLicense)
 (hLicense);
 
-BIND_FUNC(24, TLicenseStatus, gsGetLicenseStatus, TLicenseHandle hLicense)
+BIND_FUNC(24, unsigned char, _gsGetLicenseStatus, TLicenseHandle hLicense)
 (hLicense);
+
+TLicenseStatus gsGetLicenseStatus(TLicenseHandle hLicense){
+    return (TLicenseStatus)_gsGetLicenseStatus(hLicense);
+}
 
 BIND_FUNC(34, bool, gsIsLicenseValid, TLicenseHandle hLicense)
 (hLicense);
@@ -506,9 +512,9 @@ BIND_FUNC(100, const char *, gsGetAppVar, const char *name)
 
 //Custom LM
 BIND_FUNC(105, TLicenseHandle, gsCreateCustomLicense, const char *licId, const char *licName, const char *description, void *usrData,
-            lm_isValid_callback cbIsValid, lm_startAccess_callback cbStartAccess,
-            lm_finishAccess_callback cbFinishAccess, lm_onAction_callback cbOnAction,
-            lm_destroy_callback cbDestroy)
+          lm_isValid_callback cbIsValid, lm_startAccess_callback cbStartAccess,
+          lm_finishAccess_callback cbFinishAccess, lm_onAction_callback cbOnAction,
+          lm_destroy_callback cbDestroy)
 (licId, licName, description, usrData, cbIsValid, cbStartAccess, cbFinishAccess, cbOnAction, cbDestroy);
 
 BIND_FUNC(106, bool, gsBindLicense, TEntityHandle hEntity, TLicenseHandle hLic)
