@@ -60,7 +60,7 @@ static void resolveAPIs(void) {
             char *p = getenv("GS_SDK_BIN");
             if (p) {
                 char buf[MAX_PATH];
-                strncpy(buf, p, sizeof(buf));
+                strncpy(buf, p, sizeof(buf)-1);
                 int i = strlen(buf);
                 if (i < sizeof(buf) - 1) {
                     if (buf[i - 1] != '/' && buf[i - 1] != '\\') {
@@ -95,24 +95,47 @@ static void resolveAPIs(void) {
         sscanf(p, "%p", &h);
         printf("GS_CORE_BASE = [%p]", h);
     } else {
-        //Load it from the directory side by side with *this* module (lib or exe)
-        char buf[4096];
+        const char *cores[] = {"libgsCore.dylib", "libgsCore.6.dylib"};
+        for(int i = 0; !h && i < sizeof(cores)/sizeof(cores[0]); i++){
+            const char *core = cores[i];
+            char buf[4096];
+            //try searching environment variable "GS_SDK_BIN"
+            char *p = getenv("GS_SDK_BIN");
+            if (p) {
+                strncpy(buf, p, sizeof(buf)-1);
+                size_t i = strlen(buf);
+                if (i < sizeof(buf) - 1) {
+                    if (buf[i - 1] != '/') {
+                        buf[i] = '/';
+                        buf[i + 1] = 0;
+                    }
+                }
+                //try GS_SDK_BIN/libgsCore.dylib
+                std::string dll_path = std::string(buf) + core;
+                printf("try loading [%s]...", dll_path.c_str());
+                h = dlopen(dll_path.c_str(), RTLD_LAZY | RTLD_LOCAL);
+            }
 
-        dl_info di;
-        const char *core = "libgsCore.dylib";
-        if (dladdr(&apis, &di)) {
-            std::string this_module = (const char *)realpath(di.dli_fname, buf);
-            size_t i = this_module.find_last_of('/');
-            buf[i + 1] = 0;
-            strncat(buf, core, sizeof(buf));
-        } else {
-            strbcpy(buf, core, sizeof(buf));
+            if(!h){
+                //Load it from the directory side by side with *this* module (lib or exe)
+
+                dl_info di;
+                if (dladdr(&apis, &di)) {
+                    std::string this_module = (const char *)realpath(di.dli_fname, buf);
+                    size_t i = this_module.find_last_of('/');
+                    buf[i + 1] = 0;
+                    strncat(buf, core, sizeof(buf)-1);
+                } else {
+                    strncpy(buf, core, sizeof(buf)-1);
+                }
+
+                printf("Loading Core lib [%s]...\n", buf);
+                h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
+            }
         }
 
-        printf("Loading Core lib [%s]...\n", buf);
-        h = dlopen(buf, RTLD_LAZY | RTLD_LOCAL);
         if (h == nullptr) {
-            printf("ERROR: cannot load core lib [%s], abort!\n", buf);
+            printf("ERROR: cannot load core lib");
             exit(-1);
         }
     }
@@ -126,7 +149,7 @@ static void resolveAPIs(void) {
         //try searching environment variable "GS_SDK_BIN"
         char *p = getenv("GS_SDK_BIN");
         if (p) {
-            strncpy(buf, p, sizeof(buf));
+            strncpy(buf, p, sizeof(buf)-1);
             size_t i = strlen(buf);
             if (i < sizeof(buf) - 1) {
                 if (buf[i - 1] != '/') {
@@ -153,9 +176,9 @@ static void resolveAPIs(void) {
                 std::string this_module = (const char *)realpath(di.dli_fname, buf);
                 size_t i = this_module.find_last_of('/');
                 buf[i + 1] = 0;
-                strncat(buf, core, sizeof(buf));
+                strncat(buf, core, sizeof(buf)-1);
             } else {
-                strncpy(buf, core, sizeof(buf));
+                strncpy(buf, core, sizeof(buf)-1);
             }
 
             printf("Loading Core lib [%s]...\n", buf);

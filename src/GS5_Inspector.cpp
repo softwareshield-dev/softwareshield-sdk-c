@@ -1,5 +1,6 @@
 #include "GS5_Inspector.h"
 
+#include <sstream>
 #include <iomanip>
 
 namespace gs {
