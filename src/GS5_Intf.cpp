@@ -326,17 +326,8 @@ BIND_FUNC(22, const char *, gsGetLicenseName, TLicenseHandle hLicense)
 BIND_FUNC(23, const char *, gsGetLicenseDescription, TLicenseHandle hLicense)
 (hLicense);
 
-#if defined(_MAC_)||defined(_LINUX_)
 BIND_FUNC(24, TLicenseStatus, gsGetLicenseStatus, TLicenseHandle hLicense)
 (hLicense);
-#else
-BIND_FUNC(24, unsigned char, _gsGetLicenseStatus, TLicenseHandle hLicense)
-(hLicense);
-
-TLicenseStatus gsGetLicenseStatus(TLicenseHandle hLicense){
-    return (TLicenseStatus)_gsGetLicenseStatus(hLicense);
-}
-#endif
 
 BIND_FUNC(34, bool, gsIsLicenseValid, TLicenseHandle hLicense)
 (hLicense);
