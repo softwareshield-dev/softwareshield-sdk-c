@@ -6,6 +6,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <stdexcept>
 
 namespace gs {
 
@@ -52,6 +53,10 @@ std::string TGSVariable::AttrToString(int permit) {
     char Result[32];
     return gsVariableAttrToString(permit, Result, 32);
 };
+
+bool TGSVariable::hasValue() const {
+    return gsIsVariableValid(_handle);
+}
 
 //Setter
 void TGSVariable::fromString(const char *v) {
@@ -120,6 +125,9 @@ double TGSVariable::asDouble() {
     return Result;
 }
 time_t TGSVariable::asUTCTime() {
+    if(!gsIsVariableValid(_handle))
+        throw gs5_error("variable does not hold a value", GS_ERROR_NO_VALUE);
+        
     time_t Result;
     if (!gsGetVariableValueAsTime(_handle, Result))
         throw gs5_error("Time conversion error", GS_ERROR_INVALID_VALUE);

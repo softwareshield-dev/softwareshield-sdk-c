@@ -30,7 +30,7 @@ class TLM_Inspector {
 
         switch (stat) {
         case STATUS_INVALID:
-            throw std::invalid_argument("Invalid license status");
+            throw gs5_error("unknown license status", GS_ERROR_NO_VALUE);
         case STATUS_UNLOCKED:
             return "unlocked";
         case STATUS_LOCKED:
@@ -38,7 +38,7 @@ class TLM_Inspector {
         case STATUS_ACTIVE:
             return "active";
         default:
-            throw std::invalid_argument("Unknown license status");
+            throw gs5_error("invalid license status", GS_ERROR_INVALID_VALUE);
         }
     }
 };
@@ -99,7 +99,7 @@ class TLM_HardDate : public TLM_Expire {
 
     time_point_t timeBegin() const {
         if (!timeBeginEnabled())
-            throw std::invalid_argument("starting point not defined or enabled!");
+            throw gs5_error("starting point not defined or enabled!", GS_ERROR_NO_VALUE);
 
         return std::chrono::system_clock::from_time_t(_lic->getParamUTCTime("timeBegin"));
     }
@@ -110,7 +110,7 @@ class TLM_HardDate : public TLM_Expire {
 
     time_point_t timeEnd() const {
         if (!timeEndEnabled())
-            throw std::invalid_argument("ending point not defined or enabled!");
+            throw gs5_error("ending point not defined or enabled!", GS_ERROR_NO_VALUE);
 
         return std::chrono::system_clock::from_time_t(_lic->getParamUTCTime("timeEnd"));
     }
@@ -118,6 +118,13 @@ class TLM_HardDate : public TLM_Expire {
     //maximum acceptable system clock rollback (in seconds)
     int rollbackTolerance() const {
         return _lic->getParamInt("rollbackTolerance");
+    }
+
+    time_point_t expiryDate() const {
+        if (mode() == Mode::VALID_SINCE)
+            throw gs5_error("No expiry date for VALID-SINCE setting", GS_ERROR_NO_VALUE);
+
+        return this->timeEnd();
     }
 };
 
@@ -129,9 +136,35 @@ class TLM_Period : public TLM_Expire {
     TLM_Period(TGSLicense *lic) : inherited(lic) {}
     virtual ~TLM_Period() = default;
 
-    //The license has already been used before.
+    //The license has already been accessed before.
     //(first-access-time is a valid date time)
-    bool isUsed();
+    bool isAccessedBefore() const {
+        std::unique_ptr<TGSVariable> v(_lic->params("timeFirstAccess"));
+        return v->hasValue();
+    }
+
+    time_point_t firstAccessDate() const {
+        if (!isAccessedBefore())
+            throw gs5_error("license is not accessed before", GS_ERROR_NO_VALUE);
+
+        return std::chrono::system_clock::from_time_t(_lic->getParamUTCTime("timeFirstAccess"));
+    }
+    //when the license will be expired?
+    time_point_t expiryDate() const {
+        if (!isAccessedBefore())
+            throw gs5_error("license is not accessed before, so expiry date still unknown", GS_ERROR_NO_VALUE);
+
+        return std::chrono::system_clock::from_time_t(_lic->getParamUTCTime("timeEnd"));
+    }
+    //how long the license has been used?
+    //returns 0 seconds if never accessed before.
+    std::chrono::seconds elapsed() const {
+        return std::chrono::seconds(_lic->getParamInt64("usedDurationInSeconds"));
+    }
+    //total trial period
+    std::chrono::seconds period() const {
+        return std::chrono::seconds(_lic->getParamInt64("periodInSeconds"));
+    }
 };
 
 /// LM_Expire_Session Inspector

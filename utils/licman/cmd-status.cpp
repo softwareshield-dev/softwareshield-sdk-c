@@ -35,6 +35,9 @@ const char *mode_strs[3] = {"VALID_SINCE", "EXPIRE_AFTER", "VALID_RANGE"};
 void dumpDateTime(const char *name, time_point_t tp) {
     std::cout << KEYWORD(name) << ": " << gs::to_simple_string(tp) << " (" << std::chrono::system_clock::to_time_t(tp) << ")" << BR;
 }
+void dumpDuration(const char *name, std::chrono::seconds du) {
+    std::cout << KEYWORD(name) << ": " << du.count() << " (seconds)" << BR;
+}
 
 void dumpLM(TLM_Inspector &lm) {
     std::cout << KEYWORD("status") << ": " << lm.status() << PR;
@@ -49,6 +52,8 @@ void dumpLMHardDate(TGSLicense *lic) {
 
     TLM_HardDate lm(lic);
     dumpLMExpire(lm);
+
+    std::cout << KEYWORD("rollback-tolerance") << ": " << lm.rollbackTolerance() << BR;
 
     auto mode = lm.mode();
     std::cout << KEYWORD("mode") << ": " << mode_strs[(int)mode] << BR;
@@ -81,6 +86,16 @@ void dumpLMDuration(TGSLicense *lic) {
 void dumpLMPeriod(TGSLicense *lic) {
     TLM_Period lm(lic);
     dumpLMExpire(lm);
+
+    dumpDuration("period", lm.period());
+
+    if(lm.isAccessedBefore()){
+        dumpDateTime("first-access-date", lm.firstAccessDate());
+        dumpDateTime("expiry-date", lm.expiryDate());
+        dumpDuration("elapsed", lm.elapsed());
+    }else{
+        std::cout << KEYWORD("never accessed before") << BR;
+    }
 }
 void dumpLMAccessTime(TGSLicense *lic) {
     TLM_Access lm(lic);

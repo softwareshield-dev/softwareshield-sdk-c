@@ -24,7 +24,8 @@ enum {
     GS_ERROR_INVALID_ACTION = 4,  /**< Invalid action for target license */
     GS_ERROR_INVALID_LICENSE = 5, /**< Invalid license for target entity */
     GS_ERROR_INVALID_ENTITY = 6,  /**< Invalid entity for application */
-    GS_ERROR_INVALID_VALUE = 7    /**< Invalid variable value */
+    GS_ERROR_INVALID_VALUE = 7,    /**< Invalid variable value */
+    GS_ERROR_NO_VALUE = 8,    /**< variable does not hold a value */
 };
 
 #define TIMEOUT_USE_SERVER_SETTING -1
@@ -121,6 +122,11 @@ class TGSVariable : public TGSObject {
     //@}
     /** @name Value Accessor */
     //@{
+    /// Does the variable holds a value?
+    /// for UTC-Time variable, its value might not be initialized.
+    /// exception will throw if calling getters (asXXX) without any value.
+    ///
+    bool hasValue() const;
     //Setter
     ///set value from a string
     void fromString(const char *v);
