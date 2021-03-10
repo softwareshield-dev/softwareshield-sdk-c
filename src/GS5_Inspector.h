@@ -66,6 +66,17 @@ class TLM_Duration : public TLM_Expire {
   public:
     TLM_Duration(TGSLicense *lic) : inherited(lic) {}
     virtual ~TLM_Duration() = default;
+
+
+    //how long the license has been used?
+    //returns 0 seconds if never accessed before.
+    std::chrono::seconds elapsed() const {
+        return std::chrono::seconds(_lic->getParamInt64("usedDurationInSeconds"));
+    }
+    //total trial duration
+    std::chrono::seconds duration() const {
+        return std::chrono::seconds(_lic->getParamInt64("maxDurationInSeconds"));
+    }
 };
 
 /// LM_Expire_HardDate Inspector
@@ -174,6 +185,15 @@ class TLM_Session : public TLM_Expire {
   public:
     TLM_Session(TGSLicense *lic) : inherited(lic) {}
     virtual ~TLM_Session() = default;
+
+    //how many seconds elapsed in this session?
+    std::chrono::seconds elapsed() const {
+        return std::chrono::seconds(_lic->getParamInt("sessionTimeUsed"));
+    }
+    //maximum trial time in a session
+    std::chrono::seconds session() const {
+        return std::chrono::seconds(_lic->getParamInt64("maxSessionTime"));
+    }
 };
 
 /// LM_Expire_AccessTime Inspector
@@ -183,6 +203,15 @@ class TLM_Access : public TLM_Expire {
   public:
     TLM_Access(TGSLicense *lic) : inherited(lic) {}
     ~TLM_Access() = default;
+
+    //how many times has been consumed?
+    int used() const {
+        return _lic->getParamInt("usedTimes");
+    }
+    //maximum trial times allowed?
+    int total() const {
+        return _lic->getParamInt("maxAccessTimes");
+    }
 };
 
 /// LM_Always_Run Inspector

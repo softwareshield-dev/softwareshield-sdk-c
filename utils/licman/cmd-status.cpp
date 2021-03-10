@@ -36,7 +36,50 @@ void dumpDateTime(const char *name, time_point_t tp) {
     std::cout << KEYWORD(name) << ": " << gs::to_simple_string(tp) << " (" << std::chrono::system_clock::to_time_t(tp) << ")" << BR;
 }
 void dumpDuration(const char *name, std::chrono::seconds du) {
-    std::cout << KEYWORD(name) << ": " << du.count() << " (seconds)" << BR;
+    int days{0}, hours{0}, mins{0}, seconds{0};
+    const int64_t ts = du.count();
+    constexpr auto SECONDS_PER_MIN = 60;
+    constexpr auto SECONDS_PER_HOUR = 60 * 60;
+    constexpr auto SECONDS_PER_DAY = 24 * 60 * 60;
+
+    days = ts / SECONDS_PER_DAY;
+
+    int64_t left = ts - days * SECONDS_PER_DAY;
+    hours = left / SECONDS_PER_HOUR;
+
+    left = left - hours * SECONDS_PER_HOUR;
+    mins = left / SECONDS_PER_MIN;
+
+    seconds = left - mins * SECONDS_PER_MIN;
+
+    std::string s;
+    if (days) {
+        s = std::to_string(days);
+        s += days > 1 ? " (days)" : " (day)";
+    }
+    if (hours) {
+        if (!s.empty())
+            s += " ";
+        s += std::to_string(hours);
+        s += hours > 1 ? " (hours)" : "(hour)";
+    }
+    if (mins) {
+        if (!s.empty())
+            s += " ";
+        s += std::to_string(mins);
+        s += mins > 1 ? " (mins)" : "(min)";
+    }
+    if (seconds) {
+        if (!s.empty())
+            s += " ";
+        s += std::to_string(seconds);
+        s += seconds > 1 ? " (seconds)" : "(second)";
+    }
+
+    if (ts == 0)
+        std::cout << KEYWORD(name) << ": 0 (second)" << BR;
+    else
+        std::cout << KEYWORD(name) << ": " << ts << (ts > 1? " (seconds)" : " (second)") << " => " << s << BR;
 }
 
 void dumpLM(TLM_Inspector &lm) {
@@ -78,10 +121,16 @@ void dumpLMHardDate(TGSLicense *lic) {
 void dumpLMSession(TGSLicense *lic) {
     TLM_Session lm(lic);
     dumpLMExpire(lm);
+
+    dumpDuration("session", lm.session());
+    dumpDuration("elapsed", lm.elapsed());
 }
 void dumpLMDuration(TGSLicense *lic) {
     TLM_Duration lm(lic);
     dumpLMExpire(lm);
+
+    dumpDuration("duration", lm.duration());
+    dumpDuration("elapsed", lm.elapsed());
 }
 void dumpLMPeriod(TGSLicense *lic) {
     TLM_Period lm(lic);
@@ -89,17 +138,20 @@ void dumpLMPeriod(TGSLicense *lic) {
 
     dumpDuration("period", lm.period());
 
-    if(lm.isAccessedBefore()){
+    if (lm.isAccessedBefore()) {
         dumpDateTime("first-access-date", lm.firstAccessDate());
         dumpDateTime("expiry-date", lm.expiryDate());
         dumpDuration("elapsed", lm.elapsed());
-    }else{
+    } else {
         std::cout << KEYWORD("never accessed before") << BR;
     }
 }
 void dumpLMAccessTime(TGSLicense *lic) {
     TLM_Access lm(lic);
     dumpLMExpire(lm);
+
+    std::cout << KEYWORD("total") << ": " << lm.total() << BR;
+    std::cout << KEYWORD("used") << ": " << lm.used() << BR;
 }
 void dumpLMAlwaysRun(TGSLicense *lic) {
     TLM_Run lm(lic);
@@ -108,7 +160,7 @@ void dumpLMAlwaysLock(TGSLicense *lic) {
     TLM_Lock lm(lic);
 }
 
-typedef void (*dump_func_t)(TGSLicense*);
+typedef void (*dump_func_t)(TGSLicense *);
 
 std::map<std::string, dump_func_t> dumps{
     {"gs.lm.expire.hardDate.1", dumpLMHardDate},
