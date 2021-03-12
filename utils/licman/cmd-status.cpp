@@ -79,7 +79,7 @@ void dumpDuration(const char *name, std::chrono::seconds du) {
     if (ts == 0)
         std::cout << KEYWORD(name) << ": 0 (second)" << BR;
     else
-        std::cout << KEYWORD(name) << ": " << ts << (ts > 1? " (seconds)" : " (second)") << " => " << s << BR;
+        std::cout << KEYWORD(name) << ": " << ts << (ts > 1 ? " (seconds)" : " (second)") << " => " << s << BR;
 }
 
 void dumpLM(TLM_Inspector &lm) {
@@ -182,12 +182,13 @@ int displayCurrentLicenseStatus() {
     for (int i = 0; i < total_entities; i++) {
         std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
 
-        std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id();
+        std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id() << BR
+                  << KEYWORD("description") << ": " << entity->description() << BR;
         auto attr = entity->attribute();
         if (verbose) {
-            std::cout << KEYWORD(" attribute: ") << attr << " ( " << getEntityAttrString(attr) << " )" << BR;
+            std::cout << KEYWORD("attribute") << ": " << attr << " ( " << getEntityAttrString(attr) << " )" << BR;
         } else {
-            std::cout << KEYWORD(" attribute: ") << getEntityAttrString(attr) << BR;
+            std::cout << KEYWORD("attribute") << ": " << getEntityAttrString(attr) << BR;
         }
 
         //license

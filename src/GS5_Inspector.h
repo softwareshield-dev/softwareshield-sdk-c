@@ -150,8 +150,7 @@ class TLM_Period : public TLM_Expire {
     //The license has already been accessed before.
     //(first-access-time is a valid date time)
     bool isAccessedBefore() const {
-        std::unique_ptr<TGSVariable> v(_lic->params("timeFirstAccess"));
-        return v->hasValue();
+        return _lic->paramHasValue("timeFirstAccess");
     }
 
     time_point_t firstAccessDate() const {
@@ -170,7 +169,9 @@ class TLM_Period : public TLM_Expire {
     //how long the license has been used?
     //returns 0 seconds if never accessed before.
     std::chrono::seconds elapsed() const {
-        return std::chrono::seconds(_lic->getParamInt64("usedDurationInSeconds"));
+        if (!isAccessedBefore()) return std::chrono::seconds(0);
+
+        return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - this->firstAccessDate());
     }
     //total trial period
     std::chrono::seconds period() const {

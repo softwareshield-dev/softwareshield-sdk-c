@@ -217,14 +217,14 @@ bool TGSLicense::bindToEntity(TGSEntity *entity) {
         return false;
 }
 
-TGSVariable *TGSLicense::getParamByIndex(int index) {
+TGSVariable *TGSLicense::getParamByIndex(int index) const {
     if ((index >= 0) && (index < paramCount())) {
         return new TGSVariable(gsGetLicenseParamByIndex(_handle, index));
     }
     gs5_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, paramCount());
 }
 
-TGSVariable *TGSLicense::getParamByName(const char *name) {
+TGSVariable *TGSLicense::getParamByName(const char *name) const {
     gs_handle_t h = gsGetLicenseParamByName(_handle, name);
     if (h != INVALID_GS_HANDLE)
         return new TGSVariable(h);
@@ -232,7 +232,7 @@ TGSVariable *TGSLicense::getParamByName(const char *name) {
     gs5_error::raise(GS_ERROR_INVALID_NAME, "Invalid Param Name [%s]", name);
 }
 
-std::string TGSLicense::getParamStr(const char *name) {
+std::string TGSLicense::getParamStr(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asString();
 }
@@ -241,7 +241,7 @@ void TGSLicense::setParamStr(const char *name, const char *v) {
     var->fromString(v);
 }
 
-int TGSLicense::getParamInt(const char *name) {
+int TGSLicense::getParamInt(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asInt();
 }
@@ -251,7 +251,7 @@ void TGSLicense::setParamInt(const char *name, int v) {
     var->fromInt(v);
 }
 
-int64_t TGSLicense::getParamInt64(const char *name) {
+int64_t TGSLicense::getParamInt64(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asInt64();
 }
@@ -260,7 +260,7 @@ void TGSLicense::setParamInt64(const char *name, int64_t v) {
     var->fromInt64(v);
 }
 
-bool TGSLicense::getParamBool(const char *name) {
+bool TGSLicense::getParamBool(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asBool();
 }
@@ -269,7 +269,7 @@ void TGSLicense::setParamBool(const char *name, bool v) {
     var->fromBool(v);
 }
 
-float TGSLicense::getParamFloat(const char *name) {
+float TGSLicense::getParamFloat(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asFloat();
 }
@@ -278,7 +278,7 @@ void TGSLicense::setParamFloat(const char *name, float v) {
     var->fromFloat(v);
 }
 
-double TGSLicense::getParamDouble(const char *name) {
+double TGSLicense::getParamDouble(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asDouble();
 }
@@ -287,7 +287,7 @@ void TGSLicense::setParamDouble(const char *name, double v) {
     var->fromDouble(v);
 }
 
-time_t TGSLicense::getParamUTCTime(const char *name) {
+time_t TGSLicense::getParamUTCTime(const char *name) const {
     std::unique_ptr<TGSVariable> var(params(name));
     return var->asUTCTime();
 }
@@ -297,23 +297,23 @@ void TGSLicense::setParamUTCTime(const char *name, time_t v) {
 }
 
 //Properties
-const char *TGSLicense::id() {
+const char *TGSLicense::id() const {
     return gsGetLicenseId(_handle);
 }
 
-const char *TGSLicense::name() {
+const char *TGSLicense::name() const {
     return gsGetLicenseName(_handle);
 }
 
-const char *TGSLicense::description() {
+const char *TGSLicense::description() const {
     return gsGetLicenseDescription(_handle);
 }
 
-TLicenseStatus TGSLicense::status() {
+TLicenseStatus TGSLicense::status() const {
     return gsGetLicenseStatus(_handle);
 }
 
-bool TGSLicense::isValid() {
+bool TGSLicense::isValid() const {
     return gsIsLicenseValid(_handle);
 }
 
@@ -321,39 +321,39 @@ void TGSLicense::lock() {
     gsLockLicense(_handle);
 }
 
-TGSEntity *TGSLicense::licensedEntity() {
+TGSEntity *TGSLicense::licensedEntity() const {
     return _licensedEntity;
 }
 
-std::string TGSLicense::getUnlockRequestCode() {
+std::string TGSLicense::getUnlockRequestCode() const {
     std::unique_ptr<TGSRequest> req(TGSCore::getInstance()->createRequest());
     std::unique_ptr<TGSAction> act(req->addAction(ACT_UNLOCK, this->_licensedEntity));
     return req->code();
 }
 
-int TGSLicense::paramCount() {
+int TGSLicense::paramCount() const {
     return gsGetLicenseParamCount(_handle);
 }
 
-TGSVariable *TGSLicense::params(int index) {
+TGSVariable *TGSLicense::params(int index) const {
     return getParamByIndex(index);
 }
 
-TGSVariable *TGSLicense::params(const char *name) {
+TGSVariable *TGSLicense::params(const char *name) const {
     return getParamByName(name);
 }
 
-int TGSLicense::actionCount() {
+int TGSLicense::actionCount() const {
     return gsGetActionInfoCount(_handle);
 }
 
-action_id_t TGSLicense::actionIds(int index) {
+action_id_t TGSLicense::actionIds(int index) const {
     action_id_t Result;
     gsGetActionInfoByIndex(_handle, index, &Result);
     return Result;
 }
 
-const char *TGSLicense::actionNames(int index) {
+const char *TGSLicense::actionNames(int index) const {
     action_id_t dummy;
     return gsGetActionInfoByIndex(_handle, index, &dummy);
 }

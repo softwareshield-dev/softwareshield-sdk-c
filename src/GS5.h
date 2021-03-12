@@ -281,40 +281,40 @@ class TGSLicense : public TGSObject {
     /** @name License Parameter APIs */
     //@{
     /// Gets total number of parameters
-    int paramCount();
+    int paramCount() const;
     /// C++: Gets parameter by its index ( \see getParamByIndex)
-    TGSVariable *params(int index);
+    TGSVariable *params(int index) const;
     /// C++: Gets parameter by its name ( \see getParamByName )
-    TGSVariable *params(const char *name);
+    TGSVariable *params(const char *name) const;
     /// Get the license parameter by its index, ranges [0, paramCount()-1 ]
-    TGSVariable *getParamByIndex(int index);
+    TGSVariable *getParamByIndex(int index) const;
     /// Get the license parameter by its name.
-    TGSVariable *getParamByName(const char *name);
+    TGSVariable *getParamByName(const char *name) const;
 
     //@}
 
     //Common Request code helpers
     /// Gets a request code to unlock this license only.
-    std::string getUnlockRequestCode();
+    std::string getUnlockRequestCode() const;
 
     /** @name License Properties */
     //@{
     /// Gets the license object's license id
-    const char *id();
+    const char *id() const;
     /// Gets the license object's license name
-    const char *name();
+    const char *name() const;
     /// Gets the license object's license description
-    const char *description();
+    const char *description() const;
 
     /// Gets the license object's license status (ref: \ref LicenseStatus)
-    TLicenseStatus status();
+    TLicenseStatus status() const;
     /** \brief Is license currently valid?
     *
     * In GS5, an entity can be bundled with a license, the entity is accessible if
-    * any or all of its bundled licenses are valid.
+    * its bundled license is valid (unlocked and not expired).
     *
     */
-    bool isValid();
+    bool isValid() const;
 
     /** \brief Lock a license
     *
@@ -324,8 +324,19 @@ class TGSLicense : public TGSObject {
 
     //@}
 
+    /** \brief test if a nullable parameter holds a value
+     *
+     *  Some parameters might not hold a valid value (undefined, out-of-domain, null).
+     *  For example, the parameter "firstAccessTime" is not defined until the app is first launched or entity 
+     *  is first accessed.
+     */
+    bool paramHasValue(const char* name) const {
+      std::unique_ptr<TGSVariable> v(this->params(name));
+      return v->hasValue();
+    }
+
     /// Gets the entity this license is attached to.
-    TGSEntity *licensedEntity();
+    TGSEntity *licensedEntity() const;
 
     /** @name License parameter access helpers
     *
@@ -334,37 +345,37 @@ class TGSLicense : public TGSObject {
     */
     //@{
     /// Gets parameter value as a string
-    std::string getParamStr(const char *name);
+    std::string getParamStr(const char *name) const;
     /// Sets parameter value from a string
     void setParamStr(const char *name, const char *v);
 
     ///Gets parameter value as a 32-bit integer
-    int getParamInt(const char *name);
+    int getParamInt(const char *name) const;
     ///Sets parameter value as a 32-bit integer;
     void setParamInt(const char *name, int v);
 
     ///Gets parameter value as a 64-bit integer
-    int64_t getParamInt64(const char *name);
+    int64_t getParamInt64(const char *name) const;
     ///Sets parameter value as a 64-bit integer;
     void setParamInt64(const char *name, int64_t v);
 
     ///Gets parameter value as boolean
-    bool getParamBool(const char *name);
+    bool getParamBool(const char *name) const;
     ///Sets parameter value from a boolean;
     void setParamBool(const char *name, bool v);
 
     ///Gets parameter value as double;
-    double getParamDouble(const char *name);
+    double getParamDouble(const char *name) const;
     ///Sets parameter value from a double
     void setParamDouble(const char *name, double v);
 
     ///Gets parameter value as float
-    float getParamFloat(const char *name);
+    float getParamFloat(const char *name) const;
     ///Sets parameter value from float
     void setParamFloat(const char *name, float v);
 
     ///Gets parameter value as time_t (seconds since 01/01/1970)
-    time_t getParamUTCTime(const char *name);
+    time_t getParamUTCTime(const char *name) const;
     ///Sets parameter value from time_t (seconds since 01/01/1970)
     void setParamUTCTime(const char *name, time_t v);
     //@}
@@ -375,11 +386,11 @@ class TGSLicense : public TGSObject {
     * \brief Gets total number of actions appliable to a license
     * Ref: \ref ActionInfo
     */
-    int actionCount();
+    int actionCount() const;
     /// Gets action id by index (ref: \ref ActionInfo)
-    action_id_t actionIds(int index);
+    action_id_t actionIds(int index) const;
     /// Gets action name by index (ref: \ref ActionInfo)
-    const char *actionNames(int index);
+    const char *actionNames(int index) const;
 };
 
 /** \brief Request Object
