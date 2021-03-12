@@ -1,4 +1,6 @@
-srcs = ['main.cpp', 'lm-hard-date-test.cpp', 'lm-period-test.cpp']
+srcs = ['main.cpp', 'action-test.cpp',
+    'lm-hard-date-test.cpp', 
+    'lm-period-test.cpp']
 
 executable('sdk-test-0', srcs, 
     dependencies: [
