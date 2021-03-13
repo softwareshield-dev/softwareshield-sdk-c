@@ -5,50 +5,57 @@
  *  Utility actions supported by built-in license models. 
  */
 
+#include <chrono>
+
 #include "GS5.h"
 
 namespace gs {
 namespace action {
 
-template <action_id_t action_id>
-class TAction {
-  protected:
-    //setup action with proper parameters
-    virtual void prepare(TGSAction *act) {}
-
-  public:
-    virtual ~TAction() = default;
-    //add this action to a request code and optionally specify the action's target entity.
-    //if the target is not specified, the action will be applied to all entities.
-    void addTo(TGSRequest *req, const char *target_entityid = nullptr) {
-        std::unique_ptr<TGSAction> act(req->addAction(action_id, target_entityid));
-        this->prepare(act.get());
+#define DECLARE_ACTION_ID(act_id)             \
+  protected:                                  \
+    virtual action_id_t id() const override { \
+        return act_id;                        \
     }
-};
 
 //Generic Actions
-using TUnlock = TAction<ACT_UNLOCK>;
-using TLock = TAction<ACT_LOCK>;
+class TUnlock : public TAction {
+    DECLARE_ACTION_ID(ACT_UNLOCK);
+};
+
+class TLock : public TAction {
+    DECLARE_ACTION_ID(ACT_LOCK);
+};
 
 //license-specific
-class TSetPeriod : public TAction<ACT_SET_EXPIRE_PERIOD> {
+class TSetPeriod : public TAction {
+    DECLARE_ACTION_ID(ACT_SET_EXPIRE_PERIOD);
+
   private:
     int _period; // in seconds
   protected:
-    virtual void prepare(TGSAction *act) override;
+    virtual void prepare(TGSAction *act) const override;
 
   public:
     TSetPeriod(int periodInSeconds) : _period(periodInSeconds) {}
+
+    template <typename TDuration>
+    TSetPeriod(const TDuration &period) : _period(std::chrono::duration_cast<std::chrono::seconds>(period).count()) {}
 };
 
-class TAddPeriod : public TAction<ACT_ADD_EXPIRE_PERIOD> {
+class TAddPeriod : public TAction {
+    DECLARE_ACTION_ID(ACT_ADD_EXPIRE_PERIOD);
+
   private:
     int _inc; // in seconds
   protected:
-    virtual void prepare(TGSAction *act) override;
+    virtual void prepare(TGSAction *act) const override;
 
   public:
     TAddPeriod(int addedPeriodInSeconds) : _inc(addedPeriodInSeconds) {}
+
+    template <typename TDuration>
+    TAddPeriod(const TDuration &addedPeriod) : _inc(std::chrono::duration_cast<std::chrono::seconds>(addedPeriod).count()) {}
 };
 
 } // namespace action

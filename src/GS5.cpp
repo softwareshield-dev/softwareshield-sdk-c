@@ -125,9 +125,9 @@ double TGSVariable::asDouble() {
     return Result;
 }
 time_t TGSVariable::asUTCTime() {
-    if(!gsIsVariableValid(_handle))
+    if (!gsIsVariableValid(_handle))
         throw gs5_error("variable does not hold a value", GS_ERROR_NO_VALUE);
-        
+
     time_t Result;
     if (!gsGetVariableValueAsTime(_handle, Result))
         throw gs5_error("Time conversion error", GS_ERROR_INVALID_VALUE);
@@ -358,6 +358,21 @@ const char *TGSLicense::actionNames(int index) const {
     return gsGetActionInfoByIndex(_handle, index, &dummy);
 }
 
+//TAction
+void TAction::addTo(TGSRequest *req) const {
+    std::unique_ptr<TGSAction> act(req->addAction(id()));
+    this->prepare(act.get());
+}
+
+void TAction::addTo(TGSRequest *req, const char *target_entityid) const {
+    std::unique_ptr<TGSAction> act(req->addAction(id(), target_entityid));
+    this->prepare(act.get());
+}
+
+void TAction::addTo(TGSRequest *req, TGSEntity* target_entity) const {
+    std::unique_ptr<TGSAction> act(req->addAction(id(), target_entity));
+    this->prepare(act.get());
+}
 // *************** TGSRequest ***************************
 //Global action targeting all entities
 TGSAction *TGSRequest::addAction(action_id_t actId) {

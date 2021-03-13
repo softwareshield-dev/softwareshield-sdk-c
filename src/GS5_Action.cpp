@@ -2,12 +2,12 @@
 
 namespace gs::action {
 
-void TSetPeriod::prepare(TGSAction *act) {
+void TSetPeriod::prepare(TGSAction *act) const {
     std::unique_ptr<TGSVariable> v(act->getParamByName("newPeriodInSeconds"));
     v->fromInt(_period);
 }
 
-void TAddPeriod::prepare(TGSAction *act) {
+void TAddPeriod::prepare(TGSAction *act) const {
     std::unique_ptr<TGSVariable> v(act->getParamByName("addedPeriodInSeconds"));
     v->fromInt(_inc);
 }

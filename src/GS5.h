@@ -393,6 +393,23 @@ class TGSLicense : public TGSObject {
     const char *actionNames(int index) const;
 };
 
+class TGSRequest;
+
+class TAction {
+  protected:
+    virtual action_id_t id() const = 0;
+    //setup action with proper parameters
+    virtual void prepare(TGSAction *act) const {}
+
+  public:
+    virtual ~TAction() = default;
+    //add this action to a request code and optionally specify the action's target entity.
+    //if the target is not specified, the action will be applied to all entities.
+    void addTo(TGSRequest *req) const;
+    void addTo(TGSRequest *req, const char *target_entityid) const;
+    void addTo(TGSRequest *req, TGSEntity* target_entity) const;
+};
+
 /** \brief Request Object
   *
   * Request object hosts all desired actions to be applied to local license.
@@ -431,6 +448,26 @@ class TGSRequest : public TGSObject {
     * \return the pointer to action object, NULL if the action type id is not supported.
     */
     NODISCARD TGSAction *addAction(action_id_t actId, const char *entityId);
+
+    /** \brief adds built-in actions defined in GS5_Action.h
+     * 
+    * \param action Action type id;
+    * \param entityId the target entity id to which the target license is attached;
+    * \return the request object itself for chained api calling
+     */
+    TGSRequest& add(const TAction& action){
+      action.addTo(this);
+      return *this;
+    }
+    TGSRequest& add(const TAction& action, TGSEntity* entity){
+      action.addTo(this, entity);
+      return *this;
+    }
+    TGSRequest& add(const TAction& action, const char *entityId){
+      action.addTo(this, entityId);
+      return *this;
+    }
+
 
     /** \brief gets the request string code
     *
