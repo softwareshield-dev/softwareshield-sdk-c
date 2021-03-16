@@ -33,7 +33,7 @@ void test_callback(bool start) {
         bool ok = core->init(productId, LICENSE_DATA, sizeof(LICENSE_DATA), password);
         if (!ok) {
             char buf[2048];
-            snprintf(buf, sizeof(buf), "license cannot be initialized, error-code: [%d] error-message: [%s]", core->lastErrorCode(), core->lastErrorMessage());
+            snprintf(buf, sizeof(buf), "license cannot be initialized, error-code: [%d] error-message: [%s]", core->lastErrorCode(), core->lastErrorMessage().c_str());
             throw std::runtime_error(buf);
         }
 

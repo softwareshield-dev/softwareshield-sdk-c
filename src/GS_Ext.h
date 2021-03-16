@@ -506,14 +506,14 @@ class TGSApp {
     /**
 	* \brief Gets application root directory
 	*/
-    const char *getAppRootPath();
+    std::string getAppRootPath();
     /**
 	* \brief Gets application startup commandline
 	*
 	*  The startup exe of a \ref Exe-Hopping game might be different from the current exe; this function returns the 
 	*  original command line launching the game.
 	*/
-    const char *getAppCommandLine();
+    std::string getAppCommandLine();
     /**
 	* \brief Gets full path to the application startup Exe
 	*
@@ -526,7 +526,7 @@ class TGSApp {
 		HICON hAppIcon = ExtractIcon(GetModuleHandle(NULL), getAppMainExe(), 0);
 	*  \endcode
 	*/
-    const char *getAppMainExe();
+    std::string getAppMainExe();
 
     /** @name App Session Variables **/
     //@{
@@ -541,7 +541,7 @@ class TGSApp {
 	*
 	* Ref: \ref AppVar
 	*/
-    const char *getSessionVar(const char *name);
+    std::string getSessionVar(const char *name);
     //@}
 
     /**
@@ -552,7 +552,7 @@ class TGSApp {
 	* This is a simple helper to return TGSCore::productName().
 	* The game title can be used in LMApp UI. 
 	*/
-    const char *getGameTitle(); //Game Iitle
+    std::string getGameTitle(); //Game Iitle
 
     /** \brief Send User Defined Event (Synchronized event posting)
 	*

@@ -22,16 +22,16 @@ TEST_CASE("period-0", tag) {
 
     TGSCore *core = TGSCore::getInstance();
 
-    std::unique_ptr<TGSEntity> e(core->getEntityById(entity_id));
-    CHECK(e->description() == std::string("30-days"));
+    auto e(core->getEntityById(entity_id));
+    CHECK(e->description() == "30-days");
 
     SECTION("license") {
 
         CHECK(e->hasLicense());
 
-        std::unique_ptr<TGSLicense> lic(e->getLicense());
+        auto lic(e->getLicense());
         //license parameters
-        CHECK(lic->id() == std::string("gs.lm.expire.period.1"));
+        CHECK(lic->id() == "gs.lm.expire.period.1");
 
         CHECK(lic->getParamBool("exitAppOnExpire"));
 
@@ -83,11 +83,9 @@ TEST_CASE("period-0", tag) {
         SECTION("set period") {
             constexpr int new_period = 1000;
 
-            std::unique_ptr<TGSRequest> req(core->createRequest());
-            std::unique_ptr<TGSAction> act(req->addAction(ACT_SET_EXPIRE_PERIOD, e.get()));
-            std::unique_ptr<TGSVariable> v(act->getParamByName("newPeriodInSeconds"));
-
-            v->fromInt(new_period);
+            auto req(core->createRequest());
+            auto act(req->addAction(ACT_SET_EXPIRE_PERIOD, e.get()));
+            act->getParamByName("newPeriodInSeconds")->set(new_period);
 
             std::string req_code = req->code();
             //CHECK(req_code == "AKAWB-RW5F7-4WF6J-MSCZO-EAK5Q-63F3F");
@@ -101,7 +99,7 @@ TEST_CASE("period-0", tag) {
             //after applying the license code, the entity should be accessible
             CHECK(e->isAccessible());
 
-            std::unique_ptr<TGSLicense> lic(e->getLicense());
+            auto lic(e->getLicense());
             CHECK(lic->getParamInt("periodInSeconds") == new_period);
 
             clean_license(); //do not pollute license status
@@ -109,11 +107,9 @@ TEST_CASE("period-0", tag) {
         SECTION("add period") {
             constexpr int topup_period = 12000;
 
-            std::unique_ptr<TGSRequest> req(core->createRequest());
-            std::unique_ptr<TGSAction> act(req->addAction(ACT_ADD_EXPIRE_PERIOD, e.get()));
-            std::unique_ptr<TGSVariable> v(act->getParamByName("addedPeriodInSeconds"));
-
-            v->fromInt(topup_period);
+            auto req(core->createRequest());
+            auto act(req->addAction(ACT_ADD_EXPIRE_PERIOD, e.get()));
+            act->getParamByName("addedPeriodInSeconds")->set(topup_period);
 
             std::string req_code = req->code();
             //CHECK(req_code == "ADHEM-WAL75-9LB3J-L7CCX-NPZQD-IUF3F");
@@ -127,7 +123,7 @@ TEST_CASE("period-0", tag) {
             //after applying the license code, the entity should be accessible
             CHECK(e->isAccessible());
 
-            std::unique_ptr<TGSLicense> lic(e->getLicense());
+            auto lic(e->getLicense());
             CHECK(lic->getParamInt("periodInSeconds") == period + topup_period);
 
             clean_license(); //do not pollute license status

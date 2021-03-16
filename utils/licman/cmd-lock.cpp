@@ -20,7 +20,7 @@ int lockEntitiesByName(const std::vector<std::string> &names) {
     int N = core->getTotalEntities();
     int sum = 0;
     for (int i = 0; i < N; i++) {
-        std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
+        auto entity(core->getEntityByIndex(i));
         if (std::find(names.begin(), names.end(), entity->name()) != names.end()) {
             std::cout << "locking " << entity->name() << "(index: "<< i << ", id: " << entity->id() << ")" << "..." << BR;
             entity->lock();
@@ -38,7 +38,7 @@ int lockEntitiesById(const std::vector<std::string> &ids) {
     int sum = 0;
     for (const auto &id : ids) {
         try {
-            std::unique_ptr<TGSEntity> entity(core->getEntityById(id.c_str()));
+            auto entity(core->getEntityById(id.c_str()));
             std::cout << "locking " << entity->name() << "(id: " << entity->id() << ")" << "..." << BR;
             entity->lock();
             sum++;
@@ -57,7 +57,7 @@ int lockEntitiesByIndex(const std::vector<int> &indices) {
     int sum = 0;
     for (auto i : indices) {
         try {
-            std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
+            auto entity(core->getEntityByIndex(i));
             std::cout << "locking " << entity->name() << "(index: "<< i << ", id: " << entity->id() << ")" << "..." << BR;
             entity->lock();
             sum++;

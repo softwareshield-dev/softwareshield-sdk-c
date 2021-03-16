@@ -10,15 +10,15 @@
 
 namespace gs {
 
-//************** gs5_error *******************
+//************** gs_error *******************
 #ifdef _MSC_VER
-gs5_error::gs5_error(const char *msg, int code) : std::exception(msg), _code(code) {}
+gs_error::gs_error(const char *msg, int code) : std::exception(msg), _code(code) {}
 #else
-gs5_error::gs5_error(const char *msg, int code) : _msg(msg), _code(code) {
+gs_error::gs_error(const char *msg, int code) : _msg(msg), _code(code) {
 }
 #endif
 
-NORETURN void gs5_error::raise(int code, const char *message, ...) {
+NORETURN void gs_error::raise(int code, const char *message, ...) {
     va_list list;
     va_start(list, message);
     char buf[1024];
@@ -29,7 +29,7 @@ NORETURN void gs5_error::raise(int code, const char *message, ...) {
 #endif
     va_end(list);
 
-    throw gs5_error(buf, code);
+    throw gs_error(buf, code);
 }
 //***************** TGSObject *******************
 
@@ -61,27 +61,27 @@ bool TGSVariable::hasValue() const {
 //Setter
 void TGSVariable::fromString(const char *v) {
     if (!gsSetVariableValueFromString(_handle, v))
-        throw gs5_error("String conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("String conversion error", GS_ERROR_INVALID_VALUE);
 }
 void TGSVariable::fromInt(int v) {
     if (!gsSetVariableValueFromInt(_handle, v))
-        throw gs5_error("Int conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Int conversion error", GS_ERROR_INVALID_VALUE);
 }
 void TGSVariable::fromInt64(int64_t v) {
     if (!gsSetVariableValueFromInt64(_handle, v))
-        throw gs5_error("Int64 conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Int64 conversion error", GS_ERROR_INVALID_VALUE);
 }
 void TGSVariable::fromFloat(float v) {
     if (!gsSetVariableValueFromFloat(_handle, v))
-        throw gs5_error("Float conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Float conversion error", GS_ERROR_INVALID_VALUE);
 }
 void TGSVariable::fromDouble(double v) {
     if (!gsSetVariableValueFromDouble(_handle, v))
-        throw gs5_error("Double conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Double conversion error", GS_ERROR_INVALID_VALUE);
 }
 void TGSVariable::fromUTCTime(time_t t) {
     if (!gsSetVariableValueFromTime(_handle, t))
-        throw gs5_error("Time conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Time conversion error", GS_ERROR_INVALID_VALUE);
 }
 
 //Getter
@@ -92,7 +92,7 @@ const char *TGSVariable::asString() {
 int TGSVariable::asInt() {
     int Result;
     if (!gsGetVariableValueAsInt(_handle, Result))
-        throw gs5_error("Int conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Int conversion error", GS_ERROR_INVALID_VALUE);
     return Result;
 }
 
@@ -107,30 +107,30 @@ void TGSVariable::fromBool(bool v) {
 int64_t TGSVariable::asInt64() {
     int64_t Result;
     if (!gsGetVariableValueAsInt64(_handle, Result))
-        throw gs5_error("Int64 conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Int64 conversion error", GS_ERROR_INVALID_VALUE);
     return Result;
 }
 
 float TGSVariable::asFloat() {
     float Result;
     if (!gsGetVariableValueAsFloat(_handle, Result))
-        throw gs5_error("Float conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Float conversion error", GS_ERROR_INVALID_VALUE);
     return Result;
 }
 
 double TGSVariable::asDouble() {
     double Result;
     if (!gsGetVariableValueAsDouble(_handle, Result))
-        throw gs5_error("Double conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Double conversion error", GS_ERROR_INVALID_VALUE);
     return Result;
 }
 time_t TGSVariable::asUTCTime() {
     if (!gsIsVariableValid(_handle))
-        throw gs5_error("variable does not hold a value", GS_ERROR_NO_VALUE);
+        throw gs_error("variable does not hold a value", GS_ERROR_NO_VALUE);
 
     time_t Result;
     if (!gsGetVariableValueAsTime(_handle, Result))
-        throw gs5_error("Time conversion error", GS_ERROR_INVALID_VALUE);
+        throw gs_error("Time conversion error", GS_ERROR_INVALID_VALUE);
     return Result;
 }
 
@@ -175,19 +175,19 @@ TGSAction::TGSAction(gs_handle_t handle) : TGSObject(handle) {
     _totalParams = gsGetActionParamCount(_handle);
 }
 
-TGSVariable *TGSAction::getParamByIndex(int index) {
+std::shared_ptr<TGSVariable> TGSAction::getParamByIndex(int index) {
     if ((index < 0) || (index >= _totalParams)) {
-        gs5_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, _totalParams);
+        gs_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, _totalParams);
     };
-    return new TGSVariable(gsGetActionParamByIndex(_handle, index));
+    return std::make_shared<TGSVariable>(gsGetActionParamByIndex(_handle, index));
 }
 
-TGSVariable *TGSAction::getParamByName(const char *name) {
+std::shared_ptr<TGSVariable> TGSAction::getParamByName(const char *name) {
     gs_handle_t h = gsGetActionParamByName(_handle, name);
     if (h == INVALID_GS_HANDLE)
-        gs5_error::raise(GS_ERROR_INVALID_NAME, "Invalid Param Name [%s]", name);
+        gs_error::raise(GS_ERROR_INVALID_NAME, "Invalid Param Name [%s]", name);
 
-    return new TGSVariable(h);
+    return std::make_shared<TGSVariable>(h);
 }
 //Properties
 const char *TGSAction::name() {
@@ -217,95 +217,81 @@ bool TGSLicense::bindToEntity(TGSEntity *entity) {
         return false;
 }
 
-TGSVariable *TGSLicense::getParamByIndex(int index) const {
+std::shared_ptr<TGSVariable> TGSLicense::getParamByIndex(int index) const {
     if ((index >= 0) && (index < paramCount())) {
-        return new TGSVariable(gsGetLicenseParamByIndex(_handle, index));
+        return std::make_shared<TGSVariable>(gsGetLicenseParamByIndex(_handle, index));
     }
-    gs5_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, paramCount());
+    gs_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, paramCount());
 }
 
-TGSVariable *TGSLicense::getParamByName(const char *name) const {
+std::shared_ptr<TGSVariable> TGSLicense::getParamByName(const char *name) const {
     gs_handle_t h = gsGetLicenseParamByName(_handle, name);
     if (h != INVALID_GS_HANDLE)
-        return new TGSVariable(h);
+        return std::make_shared<TGSVariable>(h);
 
-    gs5_error::raise(GS_ERROR_INVALID_NAME, "Invalid Param Name [%s]", name);
+    gs_error::raise(GS_ERROR_INVALID_NAME, "Invalid Param Name [%s]", name);
 }
 
 std::string TGSLicense::getParamStr(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asString();
+    return params(name)->asString();
 }
 void TGSLicense::setParamStr(const char *name, const char *v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromString(v);
+    params(name)->fromString(v);
 }
 
 int TGSLicense::getParamInt(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asInt();
+    return params(name)->asInt();
 }
 
 void TGSLicense::setParamInt(const char *name, int v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromInt(v);
+    params(name)->fromInt(v);
 }
 
 int64_t TGSLicense::getParamInt64(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asInt64();
+    return params(name)->asInt64();
 }
 void TGSLicense::setParamInt64(const char *name, int64_t v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromInt64(v);
+    params(name)->fromInt64(v);
 }
 
 bool TGSLicense::getParamBool(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asBool();
+    return params(name)->asBool();
 }
 void TGSLicense::setParamBool(const char *name, bool v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromBool(v);
+    params(name)->fromBool(v);
 }
 
 float TGSLicense::getParamFloat(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asFloat();
+    return params(name)->asFloat();
 }
 void TGSLicense::setParamFloat(const char *name, float v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromFloat(v);
+    params(name)->fromFloat(v);
 }
 
 double TGSLicense::getParamDouble(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asDouble();
+    return params(name)->asDouble();
 }
 void TGSLicense::setParamDouble(const char *name, double v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromDouble(v);
+    params(name)->fromDouble(v);
 }
 
 time_t TGSLicense::getParamUTCTime(const char *name) const {
-    std::unique_ptr<TGSVariable> var(params(name));
-    return var->asUTCTime();
+    return params(name)->asUTCTime();
 }
 void TGSLicense::setParamUTCTime(const char *name, time_t v) {
-    std::unique_ptr<TGSVariable> var(params(name));
-    var->fromUTCTime(v);
+    params(name)->fromUTCTime(v);
 }
 
 //Properties
-const char *TGSLicense::id() const {
+std::string TGSLicense::id() const {
     return gsGetLicenseId(_handle);
 }
 
-const char *TGSLicense::name() const {
+std::string TGSLicense::name() const {
     return gsGetLicenseName(_handle);
 }
 
-const char *TGSLicense::description() const {
+std::string TGSLicense::description() const {
     return gsGetLicenseDescription(_handle);
 }
 
@@ -326,8 +312,8 @@ TGSEntity *TGSLicense::licensedEntity() const {
 }
 
 std::string TGSLicense::getUnlockRequestCode() const {
-    std::unique_ptr<TGSRequest> req(TGSCore::getInstance()->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_UNLOCK, this->_licensedEntity));
+    auto req(TGSCore::getInstance()->createRequest());
+    req->addAction(ACT_UNLOCK, this->_licensedEntity);
     return req->code();
 }
 
@@ -335,11 +321,11 @@ int TGSLicense::paramCount() const {
     return gsGetLicenseParamCount(_handle);
 }
 
-TGSVariable *TGSLicense::params(int index) const {
+std::shared_ptr<TGSVariable> TGSLicense::params(int index) const {
     return getParamByIndex(index);
 }
 
-TGSVariable *TGSLicense::params(const char *name) const {
+std::shared_ptr<TGSVariable> TGSLicense::params(const char *name) const {
     return getParamByName(name);
 }
 
@@ -353,47 +339,45 @@ action_id_t TGSLicense::actionIds(int index) const {
     return Result;
 }
 
-const char *TGSLicense::actionNames(int index) const {
+std::string TGSLicense::actionNames(int index) const {
     action_id_t dummy;
     return gsGetActionInfoByIndex(_handle, index, &dummy);
 }
 
 //TAction
 void TAction::addTo(TGSRequest &req) const {
-    std::unique_ptr<TGSAction> act(req.addAction(id()));
-    this->prepare(act.get());
+    this->prepare(req.addAction(id()));
 }
 
 void TAction::addTo(TGSRequest &req, const char *target_entityid) const {
-    std::unique_ptr<TGSAction> act(req.addAction(id(), target_entityid));
-    this->prepare(act.get());
+    this->prepare(req.addAction(id(), target_entityid));
 }
 
-void TAction::addTo(TGSRequest &req, TGSEntity* target_entity) const {
-    std::unique_ptr<TGSAction> act(req.addAction(id(), target_entity));
-    this->prepare(act.get());
+void TAction::addTo(TGSRequest &req, TGSEntity *target_entity) const {
+    this->prepare(req.addAction(id(), target_entity));
 }
 // *************** TGSRequest ***************************
 //Global action targeting all entities
-TGSAction *TGSRequest::addAction(action_id_t actId) {
+std::shared_ptr<TGSAction> TGSRequest::addAction(action_id_t actId) {
     return this->addAction(actId, (const char *)NULL);
 }
 //Action targeting all licenses of an entity
-TGSAction *TGSRequest::addAction(action_id_t actId, TGSEntity *entity) {
-    return this->addAction(actId, entity->id());
+std::shared_ptr<TGSAction> TGSRequest::addAction(action_id_t actId, TGSEntity *entity) {
+    return this->addAction(actId, entity->id().c_str());
 }
 
-TGSAction *TGSRequest::addAction(action_id_t actId, const char *entityId) {
+std::shared_ptr<TGSAction> TGSRequest::addAction(action_id_t actId, const char* entityId) {
     gs_handle_t h = gsAddRequestActionEx(_handle, actId, entityId, NULL);
     if (h != INVALID_GS_HANDLE)
-        return new TGSAction(h);
+        return std::make_shared<TGSAction>(h);
 
-    gs5_error::raise(GS_ERROR_INVALID_ACTION, "Invalid action (actId = %d)", actId);
+    gs_error::raise(GS_ERROR_INVALID_ACTION, "Invalid action (actId = %d)", actId);
 }
 
-const char *TGSRequest::code() {
+std::string TGSRequest::code() {
     return gsGetRequestCode(_handle);
 }
+
 //******************* TGSEntity ***************************
 
 bool TGSEntity::beginAccess() {
@@ -404,8 +388,8 @@ bool TGSEntity::endAccess() {
 }
 
 std::string TGSEntity::getUnlockRequestCode() {
-    std::unique_ptr<TGSRequest> req(TGSCore::getInstance()->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_UNLOCK, this));
+    auto req(TGSCore::getInstance()->createRequest());
+    req->addAction(ACT_UNLOCK, this);
     return req->code();
 }
 
@@ -413,31 +397,30 @@ bool TGSEntity::hasLicense() {
     return gsHasLicense(_handle);
 }
 
-TGSLicense *TGSEntity::getLicense() {
+std::shared_ptr<TGSLicense> TGSEntity::getLicense() {
     gs_handle_t h = gsOpenLicense(_handle);
     if (h == INVALID_GS_HANDLE)
-        gs5_error::raise(GS_ERROR_INVALID_LICENSE, "No License Bundled to entity[%s]", name());
+        gs_error::raise(GS_ERROR_INVALID_LICENSE, "No License Bundled to entity[%s]", name());
 
-    return new TGSLicense(h, this);
+    return std::make_shared<TGSLicense>(h, this);
 }
 //Properties
 unsigned int TGSEntity::attribute() {
     return gsGetEntityAttributes(_handle);
 }
-const char *TGSEntity::id() {
+std::string TGSEntity::id() const {
     return gsGetEntityId(_handle);
 }
-const char *TGSEntity::name() {
+std::string TGSEntity::name() const {
     return gsGetEntityName(_handle);
 }
-const char *TGSEntity::description() {
+std::string TGSEntity::description() const {
     return gsGetEntityDescription(_handle);
 }
 
 void TGSEntity::lock() {
     if (hasLicense()) {
-        std::unique_ptr<TGSLicense> lic(getLicense());
-        lic->lock();
+        getLicense()->lock();
     }
 }
 
@@ -579,51 +562,50 @@ const char *TGSCore::getEventName(int eventId) {
 
 void TGSCore::flush() { gsFlush(); }
 
-TGSEntity *TGSCore::getEntityByIndex(int index) const {
+std::shared_ptr<TGSEntity> TGSCore::getEntityByIndex(int index) const {
     int N = getTotalEntities();
     if ((index >= 0) && (index < N))
-        return new TGSEntity(gsOpenEntityByIndex(index));
+        return std::make_shared<TGSEntity>(gsOpenEntityByIndex(index));
 
-    gs5_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, N);
+    gs_error::raise(GS_ERROR_INVALID_INDEX, "Index [%d] out of range [0, %d)", index, N);
 }
 
-TGSEntity *TGSCore::getEntityById(entity_id_t entityId) const {
+std::shared_ptr<TGSEntity> TGSCore::getEntityById(entity_id_t entityId) const {
     gs_handle_t h = gsOpenEntityById(entityId);
     if (h != INVALID_GS_HANDLE)
-        return new TGSEntity(h);
+        return std::make_shared<TGSEntity>(h);
 
-    gs5_error::raise(GS_ERROR_INVALID_ENTITY, "Invalid EntityId (%s)", entityId);
+    gs_error::raise(GS_ERROR_INVALID_ENTITY, "Invalid EntityId (%s)", entityId);
 }
 
 //Variables
-TGSVariable *TGSCore::addVariable(const char *varName, TVarType varType,
-                                  unsigned int permission, const char *initValStr) {
-    return new TGSVariable(gsAddVariable(varName, varType, permission, initValStr));
+std::shared_ptr<TGSVariable> TGSCore::addVariable(const char *varName, TVarType varType, unsigned int permission, const char *initValStr) {
+    return std::make_shared<TGSVariable>(gsAddVariable(varName, varType, permission, initValStr));
 }
 
 bool TGSCore::removeVariable(const char *varName) {
     return gsRemoveVariable(varName);
 }
 
-TGSVariable *TGSCore::getVariableByIndex(int index) const {
+std::shared_ptr<TGSVariable> TGSCore::getVariableByIndex(int index) const {
     gs_handle_t h = gsGetVariableByIndex(index);
     if (h != INVALID_GS_HANDLE)
-        return new TGSVariable(h);
+        return std::make_shared<TGSVariable>(h);
 
-    gs5_error::raise(GS_ERROR_INVALID_INDEX, "Invalid Variable Index [%s]", index);
+    gs_error::raise(GS_ERROR_INVALID_INDEX, "Invalid Variable Index [%s]", index);
 }
 
-TGSVariable *TGSCore::getVariableByName(const char *name) const {
+std::shared_ptr<TGSVariable> TGSCore::getVariableByName(const char *name) const {
     gs_handle_t h = gsGetVariable(name);
     if (h != INVALID_GS_HANDLE)
-        return new TGSVariable(h);
+        return std::make_shared<TGSVariable>(h);
 
-    gs5_error::raise(GS_ERROR_INVALID_NAME, "Invalid Variable Name [%s]", name);
+    gs_error::raise(GS_ERROR_INVALID_NAME, "Invalid Variable Name [%s]", name);
 }
 
 //Request
-TGSRequest *TGSCore::createRequest() {
-    return new TGSRequest(gsCreateRequest());
+std::shared_ptr<TGSRequest> TGSCore::createRequest() {
+    return std::make_shared<TGSRequest>(gsCreateRequest());
 }
 
 bool TGSCore::applyLicenseCode(const char *code, const char *sn, const char *snRef) {
@@ -648,14 +630,14 @@ bool TGSCore::renderHTML(const char *url, const char *title, int width, int heig
     return gsRenderHTMLEx(url, title, width, height, resizable, exitAppWhenUIClosed, cleanUpAfterRendering);
 }
 
-const char *TGSCore::lastErrorMessage() { return gsGetLastErrorMessage(); }
-int TGSCore::lastErrorCode() { return gsGetLastErrorCode(); }
+std::string TGSCore::lastErrorMessage() const { return gsGetLastErrorMessage(); }
+int TGSCore::lastErrorCode() const { return gsGetLastErrorCode(); }
 
-const char *TGSCore::SDKVersion() { return gsGetVersion(); }
+std::string TGSCore::SDKVersion() { return gsGetVersion(); }
 
-const char *TGSCore::productName() { return gsGetProductName(); }
-const char *TGSCore::productId() { return gsGetProductId(); }
-int TGSCore::buildId() { return gsGetBuildId(); }
+std::string TGSCore::productName() const { return gsGetProductName(); }
+std::string TGSCore::productId() const { return gsGetProductId(); }
+int TGSCore::buildId() const { return gsGetBuildId(); }
 
 bool TGSCore::runInVM() { return gsRunInsideVM(0xFFFFFFFF); }
 
@@ -663,15 +645,13 @@ int TGSCore::getTotalEntities() const { return gsGetEntityCount(); }
 
 void TGSCore::lockAllEntities() {
     for (int i = 0; i < getTotalEntities(); i++) {
-        std::unique_ptr<TGSEntity> entity(getEntityByIndex(i));
-        entity->lock();
+        getEntityByIndex(i)->lock();
     }
 }
 
 bool TGSCore::isAllEntitiesLocked() const {
     for (int i = 0; i < getTotalEntities(); i++) {
-        std::unique_ptr<TGSEntity> entity(getEntityByIndex(i));
-        if (!entity->isLocked())
+        if (!getEntityByIndex(i)->isLocked())
             return false;
     }
     return true;
@@ -687,23 +667,23 @@ void TGSCore::trace(const char *msg) {
 }
 
 std::string TGSCore::getFixRequestCode() {
-    std::unique_ptr<TGSRequest> req(this->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_FIX));
+    auto req(this->createRequest());
+    req->addAction(ACT_FIX);
     return req->code();
 }
 std::string TGSCore::getUnlockRequestCode() {
-    std::unique_ptr<TGSRequest> req(this->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_UNLOCK));
+    auto req(this->createRequest());
+    req->addAction(ACT_UNLOCK);
     return req->code();
 }
 std::string TGSCore::getCleanRequestCode() {
-    std::unique_ptr<TGSRequest> req(this->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_CLEAN));
+    auto req(this->createRequest());
+    req->addAction(ACT_CLEAN);
     return req->code();
 }
 std::string TGSCore::getDummyRequestCode() {
-    std::unique_ptr<TGSRequest> req(this->createRequest());
-    std::unique_ptr<TGSAction> act(req->addAction(ACT_DUMMY));
+    auto req(this->createRequest());
+    req->addAction(ACT_DUMMY);
     return req->code();
 }
 

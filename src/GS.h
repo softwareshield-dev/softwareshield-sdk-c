@@ -1,4 +1,4 @@
-/*! \file GS.h
+/** \file GS.h
   \brief GS Core OOP Interface
 
   This file is needed to access gsCore apis in OOP style
@@ -24,8 +24,8 @@ enum {
     GS_ERROR_INVALID_ACTION = 4,  /**< Invalid action for target license */
     GS_ERROR_INVALID_LICENSE = 5, /**< Invalid license for target entity */
     GS_ERROR_INVALID_ENTITY = 6,  /**< Invalid entity for application */
-    GS_ERROR_INVALID_VALUE = 7,    /**< Invalid variable value */
-    GS_ERROR_NO_VALUE = 8,    /**< variable does not hold a value */
+    GS_ERROR_INVALID_VALUE = 7,   /**< Invalid variable value */
+    GS_ERROR_NO_VALUE = 8,        /**< variable does not hold a value */
 };
 
 #define TIMEOUT_USE_SERVER_SETTING -1
@@ -51,7 +51,7 @@ enum {
 #endif
 
 //GS5 exception
-class gs5_error : public std::exception {
+class gs_error : public std::exception {
   private:
 #ifndef _MSC_VER
     std::string _msg;
@@ -59,8 +59,8 @@ class gs5_error : public std::exception {
     int _code;
 
   public:
-    gs5_error(const char *msg, int code = GS_ERROR_GENERIC);
-    virtual ~gs5_error() {}
+    gs_error(const char *msg, int code = GS_ERROR_GENERIC);
+    virtual ~gs_error() {}
 
     int code() const { return _code; }
 
@@ -241,14 +241,14 @@ class TGSAction : public TGSObject {
       \param index the index of parameter, range [0, paramCount()-1 ]
       \return a TGSVariable instance on success, NULL if paramer not found
       */
-    TGSVariable *getParamByIndex(int index);
+    std::shared_ptr<TGSVariable> getParamByIndex(int index);
     /**
       \brief Gets action parameter by its name
 
       \param name the string name of a action parameter.
       \return a TGSVariable instance on success, NULL if paramer not found
       */
-    TGSVariable *getParamByName(const char *name);
+    std::shared_ptr<TGSVariable> getParamByName(const char *name);
     //@}
 };
 
@@ -283,13 +283,13 @@ class TGSLicense : public TGSObject {
     /// Gets total number of parameters
     int paramCount() const;
     /// C++: Gets parameter by its index ( \see getParamByIndex)
-    TGSVariable *params(int index) const;
+    std::shared_ptr<TGSVariable> params(int index) const;
     /// C++: Gets parameter by its name ( \see getParamByName )
-    TGSVariable *params(const char *name) const;
+    std::shared_ptr<TGSVariable> params(const char *name) const;
     /// Get the license parameter by its index, ranges [0, paramCount()-1 ]
-    TGSVariable *getParamByIndex(int index) const;
+    std::shared_ptr<TGSVariable> getParamByIndex(int index) const;
     /// Get the license parameter by its name.
-    TGSVariable *getParamByName(const char *name) const;
+    std::shared_ptr<TGSVariable> getParamByName(const char *name) const;
 
     //@}
 
@@ -300,11 +300,11 @@ class TGSLicense : public TGSObject {
     /** @name License Properties */
     //@{
     /// Gets the license object's license id
-    const char *id() const;
+    std::string id() const;
     /// Gets the license object's license name
-    const char *name() const;
+    std::string name() const;
     /// Gets the license object's license description
-    const char *description() const;
+    std::string description() const;
 
     /// Gets the license object's license status (ref: \ref LicenseStatus)
     TLicenseStatus status() const;
@@ -330,9 +330,8 @@ class TGSLicense : public TGSObject {
      *  For example, the parameter "firstAccessTime" is not defined until the app is first launched or entity 
      *  is first accessed.
      */
-    bool paramHasValue(const char* name) const {
-      std::unique_ptr<TGSVariable> v(this->params(name));
-      return v->hasValue();
+    bool paramHasValue(const char *name) const {
+        return this->params(name)->hasValue();
     }
 
     /// Gets the entity this license is attached to.
@@ -390,7 +389,7 @@ class TGSLicense : public TGSObject {
     /// Gets action id by index (ref: \ref ActionInfo)
     action_id_t actionIds(int index) const;
     /// Gets action name by index (ref: \ref ActionInfo)
-    const char *actionNames(int index) const;
+    std::string actionNames(int index) const;
 };
 
 class TGSRequest;
@@ -399,7 +398,7 @@ class TAction {
   protected:
     virtual action_id_t id() const = 0;
     //setup action with proper parameters
-    virtual void prepare(TGSAction *act) const {}
+    virtual void prepare(std::shared_ptr<TGSAction> act) const {}
 
   public:
     virtual ~TAction() = default;
@@ -407,7 +406,7 @@ class TAction {
     //if the target is not specified, the action will be applied to all entities.
     void addTo(TGSRequest &req) const;
     void addTo(TGSRequest &req, const char *target_entityid) const;
-    void addTo(TGSRequest &req, TGSEntity* target_entity) const;
+    void addTo(TGSRequest &req, TGSEntity *target_entity) const;
 };
 
 /** \brief Request Object
@@ -425,6 +424,7 @@ class TAction {
   * license code targeting the client's machine without a request code.
   *
   */
+
 class TGSRequest : public TGSObject {
   public:
     TGSRequest(gs_handle_t handle) : TGSObject(handle) {}
@@ -433,21 +433,21 @@ class TGSRequest : public TGSObject {
     *
     * Adds an action targeting the whole license storage (ACT_CLEAN), or can be applied to all entities( ACT_LOCK, ACT_UNLOCK, etc.)
     */
-    NODISCARD TGSAction *addAction(action_id_t actId);
+    std::shared_ptr<TGSAction> addAction(action_id_t actId);
     /** \brief adds an action targeting all licenses of an entity
     *
     * \param actId Action type id;
     * \param entity the target entity, the action will be applied to all licenses attached to the entity.
     * \return the pointer to action object, NULL if the action type id is not supported.
     */
-    NODISCARD TGSAction *addAction(action_id_t actId, TGSEntity *entity);
+    std::shared_ptr<TGSAction> addAction(action_id_t actId, TGSEntity *entity);
     /** \brief adds an action targeting a single license object
     *
     * \param actId Action type id;
     * \param entityId the target entity id to which the target license is attached;
     * \return the pointer to action object, NULL if the action type id is not supported.
     */
-    NODISCARD TGSAction *addAction(action_id_t actId, const char *entityId);
+    std::shared_ptr<TGSAction> addAction(action_id_t actId, const char* entityId);
 
     /** \brief adds built-in actions defined in GS5_Action.h
      * 
@@ -455,25 +455,24 @@ class TGSRequest : public TGSObject {
     * \param entityId the target entity id to which the target license is attached;
     * \return the request object itself for chained api calling
      */
-    TGSRequest& add(const TAction& action){
-      action.addTo(*this);
-      return *this;
+    TGSRequest &add(const TAction &action) {
+        action.addTo(*this);
+        return *this;
     }
-    TGSRequest& add(const TAction& action, TGSEntity* entity){
-      action.addTo(*this, entity);
-      return *this;
+    TGSRequest &add(const TAction &action, TGSEntity *entity) {
+        action.addTo(*this, entity);
+        return *this;
     }
-    TGSRequest& add(const TAction& action, const char *entityId){
-      action.addTo(*this, entityId);
-      return *this;
+    TGSRequest &add(const TAction &action, const char *entityId) {
+        action.addTo(*this, entityId);
+        return *this;
     }
-
 
     /** \brief gets the request string code
     *
     *  Ref: \ref requestCode "Request Code"
     */
-    const char *code();
+    std::string code();
 };
 
 /// Entity Object
@@ -538,11 +537,11 @@ class TGSEntity : public TGSObject {
     /// Entity Attributes (ref: \ref EntityAttr)
     unsigned int attribute();
     /// Entity Id
-    const char *id();
+    std::string id() const;
     /// Entity Name
-    const char *name();
+    std::string name() const;
     /// Entity Description
-    const char *description();
+    std::string description() const;
     //@}}}}}}}}}}}}}}}}}}}}}}}}
 
     /** @name License **/
@@ -551,7 +550,7 @@ class TGSEntity : public TGSObject {
     bool hasLicense();
 
     ///Get the attached license
-    TGSLicense *getLicense();
+    std::shared_ptr<TGSLicense> getLicense();
     //@}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 };
 
@@ -799,7 +798,7 @@ class TGSCore {
     *
     * ref: \ref eventId "Event Id"
     */
-    static const char *getEventName(int eventId);
+    static const char* getEventName(int eventId);
 
     ///Save license immediately if dirty
     void flush();
@@ -810,9 +809,10 @@ class TGSCore {
     int getTotalEntities() const;
 
     /// Get entity by index ( 0 <= index < getTotalEntities()-1 )
-    TGSEntity *getEntityByIndex(int index) const;
+    std::shared_ptr<TGSEntity> getEntityByIndex(int index) const;
     /// Get entity by its unique entity id
-    TGSEntity *getEntityById(entity_id_t entityId) const;
+    std::shared_ptr<TGSEntity> getEntityById(entity_id_t entityId) const;
+
     //@}
     /** @name "User Defined Variables" */
     //@{{{
@@ -827,8 +827,11 @@ class TGSCore {
     * \return if the variable already exists, returns the variable object, otherwise returns the the created new variable
     *
     */
-    TGSVariable *addVariable(const char *varName, TVarType varType,
-                             unsigned int attr, const char *initValStr);
+    std::shared_ptr<TGSVariable> addVariable(const char *varName, TVarType varType, unsigned int attr, const char *initValStr);
+    /// Get user defined variable by its name
+    std::shared_ptr<TGSVariable> getVariableByName(const char *name) const;
+    /// Get user defined variable by index ( 0 <= index < getTotalVariables() )
+    std::shared_ptr<TGSVariable> getVariableByIndex(int index) const;
 
     /** \brief remove user defined variable by its name
     * \param varName variable name
@@ -840,13 +843,9 @@ class TGSCore {
     int getTotalVariables() const {
         return gsGetTotalVariables();
     }
-    /// Get user defined variable by its name
-    TGSVariable *getVariableByName(const char *name) const;
-    /// Get user defined variable by index ( 0 <= index < getTotalVariables() )
-    TGSVariable *getVariableByIndex(int index) const;
     //@}}}
     /// Create a request object
-    TGSRequest *createRequest();
+    std::shared_ptr<TGSRequest> createRequest();
 
     /// Apply license code
     bool applyLicenseCode(const char *code, const char *sn = NULL, const char *snRef = NULL);
@@ -927,19 +926,19 @@ class TGSCore {
     //@}
     //======================================================
     ///Get the last error message
-    const char *lastErrorMessage();
+    std::string lastErrorMessage() const;
     ///Get the last error code
-    int lastErrorCode();
+    int lastErrorCode() const;
 
     ///Get the current SDK binary version
-    static const char *SDKVersion();
+    static std::string SDKVersion();
 
     ///Get product name
-    const char *productName();
+    std::string productName() const;
     ///Get product unique id
-    const char *productId();
+    std::string productId() const;
     ///Get product Build Id (ref: \ref BuildId "Build Id")
-    int buildId();
+    int buildId() const;
 
     /**
     *	\brief Test if the current process is running inside GS5 Ironwrapper runtime
@@ -1126,9 +1125,9 @@ class TGSCore {
     *  \param mpDataStr the encrypted data string of a move package.
     *         if mpDataStr == NULL, then an empty move package is created
     */
-    TMovePackage *createMovePackage(const char *mpDataStr = NULL) {
+    std::shared_ptr<TMovePackage> createMovePackage(const char *mpDataStr = NULL) {
         TMPHandle hMP = (mpDataStr == NULL) ? gsMPCreate(0) : gsMPOpen(mpDataStr);
-        return (hMP == NULL) ? NULL : new TMovePackage(hMP);
+        return (hMP == NULL) ? NULL : std::make_shared<TMovePackage>(hMP);
     }
 
     //Move the whole license via online license server
@@ -1147,11 +1146,12 @@ class TGSCore {
     }
 
     //Code Exchange
-    static TCodeExchange *beginCodeExchange() {
+    static std::shared_ptr<TCodeExchange> beginCodeExchange() {
         TCodeExchangeHandle h = gsCodeExchangeBegin();
-        if (h != NULL)
-            return new TCodeExchange(h);
-        return NULL;
+        if (h == NULL)
+            gs_error::raise(GS_ERROR_INVALID_HANDLE, "cannot start code-exchange");
+
+        return std::make_shared<TCodeExchange>(h);
     }
 };
 

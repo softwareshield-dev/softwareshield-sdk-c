@@ -34,7 +34,7 @@ class TSetPeriod : public TAction {
   private:
     int _period; // in seconds
   protected:
-    virtual void prepare(TGSAction *act) const override;
+    virtual void prepare(std::shared_ptr<TGSAction> act) const override;
 
   public:
     TSetPeriod(int periodInSeconds) : _period(periodInSeconds) {}
@@ -49,7 +49,7 @@ class TAddPeriod : public TAction {
   private:
     int _inc; // in seconds
   protected:
-    virtual void prepare(TGSAction *act) const override;
+    virtual void prepare(std::shared_ptr<TGSAction> act) const override;
 
   public:
     TAddPeriod(int addedPeriodInSeconds) : _inc(addedPeriodInSeconds) {}

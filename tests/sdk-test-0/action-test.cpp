@@ -13,10 +13,10 @@ namespace {
 
 TEST_CASE("act-0", tag){
     auto core = TGSCore::getInstance();
-    std::unique_ptr<TGSEntity> e(core->getEntityById(entity_id));
+    auto e(core->getEntityById(entity_id));
 
-    std::unique_ptr<TGSRequest> req1(core->createRequest());
-    std::unique_ptr<TGSRequest> req2(core->createRequest());
+    auto req1(core->createRequest());
+    auto req2(core->createRequest());
 
     using namespace gs::action;
 

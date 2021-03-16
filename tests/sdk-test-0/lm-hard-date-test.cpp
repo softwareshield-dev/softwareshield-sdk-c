@@ -20,7 +20,7 @@ TEST_CASE("hard-date-valid-range", tag) {
     const std::time_t T1 = 1735718400; //2025-01-1
 
     auto core = TGSCore::getInstance();
-    std::unique_ptr<TGSEntity> e1{core->getEntityByIndex(0)};
+    auto e1{core->getEntityByIndex(0)};
 
     CHECK(e1->id() == std::string("a98b6275-b494-4cd9-bff5-4526aa0efd12"));
     CHECK(e1->description() == std::string("accessible in 2024 only"));
@@ -32,7 +32,7 @@ TEST_CASE("hard-date-valid-range", tag) {
     SECTION("license") {
         CHECK(e1->hasLicense());
 
-        std::unique_ptr<TGSLicense> lic(e1->getLicense());
+        auto lic(e1->getLicense());
         //license parameters
         CHECK(lic->id() == std::string("gs.lm.expire.hardDate.1"));
 
@@ -84,15 +84,15 @@ TEST_CASE("hard-date-expire-after", tag) {
 
     TGSCore* core = TGSCore::getInstance();
 
-    std::unique_ptr<TGSEntity> e2 (core->getEntityById(entity_id));
-    CHECK(e2->description() == std::string("expired after year 2000"));
+    auto e2 (core->getEntityById(entity_id));
+    CHECK(e2->description() == "expired after year 2000");
 
     SECTION("license"){
         CHECK(e2->hasLicense());
 
-        std::unique_ptr<TGSLicense> lic(e2->getLicense());
+        auto lic(e2->getLicense());
         //license parameters
-        CHECK(lic->id() == std::string("gs.lm.expire.hardDate.1"));
+        CHECK(lic->id() == "gs.lm.expire.hardDate.1");
 
         CHECK_FALSE(lic->getParamBool("timeBeginEnabled"));
         CHECK(lic->getParamBool("timeEndEnabled"));
@@ -113,9 +113,9 @@ TEST_CASE("hard-date-expire-after", tag) {
     SECTION("actions"){
         CHECK(e2->isLocked()); //the entity should not be accessible since the current time is > year 2000/01/01.
 
-        std::unique_ptr<TGSRequest> req(core->createRequest());
-        std::unique_ptr<TGSAction> act(req->addAction(ACT_SET_ENDDATE, e2.get())); //targeting e2 only
-        std::unique_ptr<TGSVariable> v(act->getParamByName("endDate"));
+        auto req(core->createRequest());
+        auto act(req->addAction(ACT_SET_ENDDATE, e2.get())); //targeting e2 only
+        auto v(act->getParamByName("endDate"));
         
         //set timeEnd to 2030
         tm year2030 {0};
@@ -139,7 +139,7 @@ TEST_CASE("hard-date-expire-after", tag) {
         //after applying the license code, the entity should be accessible
         CHECK(e2->isAccessible());
 
-        std::unique_ptr<TGSLicense> lic(e2->getLicense());
+        auto lic(e2->getLicense());
         CHECK(lic->getParamUTCTime("timeEnd") == t2030);
 
         clean_license(); //do not pollute license status
@@ -153,15 +153,15 @@ TEST_CASE("hard-date-valid-since", tag) {
 
     TGSCore* core = TGSCore::getInstance();
 
-    std::unique_ptr<TGSEntity> e3 (core->getEntityById(entity_id));
-    CHECK(e3->description() == std::string("valid since 2021"));
+    auto e3 (core->getEntityById(entity_id));
+    CHECK(e3->description() == "valid since 2021");
 
     SECTION("license"){
         CHECK(e3->hasLicense());
 
-        std::unique_ptr<TGSLicense> lic(e3->getLicense());
+        auto lic(e3->getLicense());
         //license parameters
-        CHECK(lic->id() == std::string("gs.lm.expire.hardDate.1"));
+        CHECK(lic->id() == "gs.lm.expire.hardDate.1");
 
         CHECK(lic->getParamBool("timeBeginEnabled"));
         CHECK_FALSE(lic->getParamBool("timeEndEnabled"));
@@ -181,9 +181,9 @@ TEST_CASE("hard-date-valid-since", tag) {
     SECTION("actions"){
         CHECK(e3->isAccessible()); //the entity should not be accessible since the current time is > year 2021/01/01.
 
-        std::unique_ptr<TGSRequest> req(core->createRequest());
-        std::unique_ptr<TGSAction> act(req->addAction(ACT_SET_STARTDATE, e3.get())); //targeting e3 only
-        std::unique_ptr<TGSVariable> v(act->getParamByName("startDate"));
+        auto req(core->createRequest());
+        auto act(req->addAction(ACT_SET_STARTDATE, e3.get())); //targeting e3 only
+        auto v(act->getParamByName("startDate"));
         
         //set timeBegin to 2030
         tm year2030 {0};
@@ -207,7 +207,7 @@ TEST_CASE("hard-date-valid-since", tag) {
         //after applying the license code, the entity should be blocked (until 2030)
         CHECK_FALSE(e3->isAccessible());
 
-        std::unique_ptr<TGSLicense> lic(e3->getLicense());
+        auto lic(e3->getLicense());
         CHECK(lic->getParamUTCTime("timeBegin") == t2030);
 
         clean_license(); //do not pollute license status

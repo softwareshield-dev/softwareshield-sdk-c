@@ -335,9 +335,9 @@ typedef enum {
 /// License Status
 typedef enum {
     STATUS_INVALID = 0xFF, ///<The current status value is invalid
-    STATUS_LOCKED = 0,   ///<isValid() always return false  the license is disabled permanently.
-    STATUS_UNLOCKED = 1, ///<isValid() always return true, it happens when fully purchased.
-    STATUS_ACTIVE = 2    ///<isValid() works by its own logic.
+    STATUS_LOCKED = 0,     ///<isValid() always return false  the license is disabled permanently.
+    STATUS_UNLOCKED = 1,   ///<isValid() always return true, it happens when fully purchased.
+    STATUS_ACTIVE = 2      ///<isValid() works by its own logic.
 } TLicenseStatus;
 
 /// Defines Event Type Base

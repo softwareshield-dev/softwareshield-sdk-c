@@ -1,7 +1,7 @@
 #include "GS_Inspector.h"
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace gs {
 

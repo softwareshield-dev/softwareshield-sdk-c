@@ -196,7 +196,7 @@ TGSApp::~TGSApp() {
     _core->cleanUp();
 }
 
-const char *TGSApp::getGameTitle() { //Game Iitle
+std::string TGSApp::getGameTitle() { //Game Iitle
     return _core->productName();
 }
 void TGSApp::sendUserEvent(unsigned int eventId, void *eventData, unsigned int eventDataSize) {
@@ -248,20 +248,20 @@ bool TGSApp::isMainThread() {
     return gsIsMainThread();
 }
 
-const char *TGSApp::getAppRootPath() {
+std::string TGSApp::getAppRootPath() {
     return gsGetAppRootPath();
 }
-const char *TGSApp::getAppCommandLine() {
+std::string TGSApp::getAppCommandLine() {
     return gsGetAppCommandLine();
 }
-const char *TGSApp::getAppMainExe() {
+std::string TGSApp::getAppMainExe() {
     return gsGetAppMainExe();
 }
 //App Session Variables
 void TGSApp::setSessionVar(const char *name, const char *val) {
     gsSetAppVar(name, val);
 }
-const char *TGSApp::getSessionVar(const char *name) {
+std::string TGSApp::getSessionVar(const char *name) {
     return gsGetAppVar(name);
 }
 

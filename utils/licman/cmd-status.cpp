@@ -180,7 +180,7 @@ int displayCurrentLicenseStatus() {
 
     std::cout << "Total Entities: " << total_entities << BR << std::string(18, '=') << BR;
     for (int i = 0; i < total_entities; i++) {
-        std::unique_ptr<TGSEntity> entity(core->getEntityByIndex(i));
+        auto entity(core->getEntityByIndex(i));
 
         std::cout << "[" << i << "] " << KEYWORD("name: ") << entity->name() << "," << KEYWORD(" id: ") << entity->id() << BR
                   << KEYWORD("description") << ": " << entity->description() << BR;
@@ -197,7 +197,7 @@ int displayCurrentLicenseStatus() {
 
         std::cout << H3("License");
 
-        std::unique_ptr<TGSLicense> lic(entity->getLicense());
+        auto lic(entity->getLicense());
         std::string id = lic->id();
 
         std::cout << KEYWORD("type: ") << id << BR;
