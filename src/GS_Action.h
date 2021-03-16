@@ -1,5 +1,5 @@
-#ifndef GS5_ACTION_H_
-#define GS5_ACTION_H_
+#ifndef GS_ACTION_H_
+#define GS_ACTION_H_
 
 /**
  *  Utility actions supported by built-in license models. 
@@ -7,7 +7,7 @@
 
 #include <chrono>
 
-#include "GS5.h"
+#include "GS.h"
 
 namespace gs {
 namespace action {

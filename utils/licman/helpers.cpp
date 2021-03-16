@@ -1,7 +1,7 @@
 #include "helpers.h"
 #include "params.h"
 
-#include "GS5.h"
+#include "GS.h"
 
 namespace licman {
 namespace {

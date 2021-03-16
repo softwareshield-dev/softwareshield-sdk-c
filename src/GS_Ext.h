@@ -1,13 +1,13 @@
-/*! \file GS5_Ext.h
-	\brief GS5 Extension Development
+/*! \file GS_Ext.h
+	\brief GS Extension Development
 
 	This file is needed to develop your own GS5 extensions such as a license model or GS5 event monitor. 
 */
 
-#ifndef _GS5_EXT_H_
-#define _GS5_EXT_H_
+#ifndef _GS_EXT_H_
+#define _GS_EXT_H_
 
-#include "GS5.h"
+#include "GS.h"
 
 #include <memory>
 

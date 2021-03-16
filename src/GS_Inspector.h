@@ -1,5 +1,5 @@
-#ifndef GS5_INSPECTOR_H_
-#define GS5_INSPECTOR_H_
+#ifndef GS_INSPECTOR_H_
+#define GS_INSPECTOR_H_
 
 /**
   *  Built-In License Model Inspectors
@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "GS5.h"
+#include "GS.h"
 
 namespace gs {
 

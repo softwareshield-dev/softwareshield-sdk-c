@@ -1,6 +1,6 @@
 #include "cmd-lock.h"
 
-#include "GS5.h"
+#include "GS.h"
 #include "helpers.h"
 
 using namespace gs;

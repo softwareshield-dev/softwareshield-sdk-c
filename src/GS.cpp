@@ -1,4 +1,4 @@
-#include "GS5.h"
+#include "GS.h"
 
 #ifdef _MSC_VER
 #include <Windows.h>

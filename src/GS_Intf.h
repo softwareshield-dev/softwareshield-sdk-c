@@ -1,12 +1,12 @@
 /**
-* \file GS5_Intf.h
+* \file GS_Intf.h
 * \brief gsCore C API Interface
 *
 *  These apis are flat-C style handle-based apis, OOP classes are recommended in GS5 extension development.
 *
 */
-#ifndef _GS5_INTF_H_
-#define _GS5_INTF_H_
+#ifndef _GS_INTF_H_
+#define _GS_INTF_H_
 
 //VC2008 does not support C99 standard, uses file downloaded from https://code.google.com/p/msinttypes/
 #include <cstdint>

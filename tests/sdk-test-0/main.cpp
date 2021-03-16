@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include <GS5.h>
+#include <GS.h>
 using namespace gs;
 
 namespace {

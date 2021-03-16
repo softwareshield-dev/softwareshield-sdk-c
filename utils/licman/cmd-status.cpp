@@ -5,8 +5,8 @@
 
 #include <map>
 
-#include <GS5.h>
-#include <GS5_Inspector.h>
+#include <GS.h>
+#include <GS_Inspector.h>
 
 using namespace gs;
 

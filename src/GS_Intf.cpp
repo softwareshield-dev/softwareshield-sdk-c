@@ -1,4 +1,4 @@
-#include "GS5_Intf.h"
+#include "GS_Intf.h"
 
 #include <assert.h>
 #include <stdexcept>

@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 #include <catch_ex.h>
 
-#include <GS5_Action.h>
+#include <GS_Action.h>
 using namespace gs;
 
 #include <chrono>

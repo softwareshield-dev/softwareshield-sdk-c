@@ -1,17 +1,17 @@
-/*! \file GS5.h
-  \brief GS5 Core OOP Interface
+/*! \file GS.h
+  \brief GS Core OOP Interface
 
   This file is needed to access gsCore apis in OOP style
   */
-#ifndef _GS5_WRAP_H_
-#define _GS5_WRAP_H_
+#ifndef _GS_H_
+#define _GS_H_
 
 #include <cassert>
 #include <exception>
 #include <memory>
 #include <string>
 
-#include "GS5_Intf.h"
+#include "GS_Intf.h"
 
 namespace gs {
 

@@ -1,4 +1,4 @@
-#include "GS5_Inspector.h"
+#include "GS_Inspector.h"
 
 #include <sstream>
 #include <iomanip>

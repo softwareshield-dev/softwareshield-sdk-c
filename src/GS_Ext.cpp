@@ -1,6 +1,6 @@
-#include "GS5_Ext.h"
-#include "GS5.h"
-#include "GS5_Intf.h"
+#include "GS_Ext.h"
+#include "GS.h"
+#include "GS_Intf.h"
 
 #include <vector>
 

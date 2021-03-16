@@ -7,7 +7,7 @@
 #include "on-exit.h"
 #include "params.h"
 
-#include <GS5.h>
+#include <GS.h>
 using namespace gs;
 
 int main(int argc, char *args[]) {

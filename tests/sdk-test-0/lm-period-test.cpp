@@ -5,8 +5,8 @@
 #include <thread>
 using namespace std::chrono_literals;
 
-#include <GS5.h>
-#include <GS5_Inspector.h>
+#include <GS.h>
+#include <GS_Inspector.h>
 using namespace gs;
 
 #include "main.h" // for clean_license()
