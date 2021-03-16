@@ -10,11 +10,19 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <chrono>
 
 #include "GS_Intf.h"
 
 namespace gs {
 
+using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
+
+//Date time helpers
+std::string format_time_t(std::time_t t, const char *format);
+
+std::string to_simple_string(time_point_t tp);
+std::string to_iso_string(time_point_t tp);
 /// GS5 error code
 enum {
     GS_ERROR_GENERIC = -1,        ///< Generic error

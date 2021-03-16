@@ -7,15 +7,11 @@
   *  An inspector encapsulates LM-specific functions into a helper class, otherwise you have to access a LM via TGSLicense ( a generic way)
   *
   */
-#include <chrono>
-#include <stdexcept>
-#include <string>
 
 #include "GS.h"
 
 namespace gs {
 
-using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 
 //root base for all license model inspectors
 class TLM_Inspector {
@@ -233,11 +229,6 @@ class TLM_Lock : public TLM_Inspector {
     ~TLM_Lock() = default;
 };
 
-//Date time helpers
-std::string format_time_t(std::time_t t, const char *format);
-
-std::string to_simple_string(time_point_t tp);
-std::string to_iso_string(time_point_t tp);
 
 } // namespace gs
 

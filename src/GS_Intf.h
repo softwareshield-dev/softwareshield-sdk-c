@@ -184,13 +184,6 @@ namespace gs {
 /// Dummy action, carry only client id
 #define ACT_DUMMY 12
 
-#define ACT_PUSH 13
-#define ACT_PULL 14
-
-/// Enable Demo Nag UI
-#define ACT_NAG_ON 15
-/// Disable Demo Nag UI
-#define ACT_NAG_OFF 16
 /// Activation Code can be used only once
 #define ACT_ONE_SHOT 17
 /// Activation Code has a shelf time
@@ -202,6 +195,13 @@ namespace gs {
 /// Revoke local license
 #define ACT_REVOKE 20
 //@}
+  
+//set user defined variable
+#define ACT_SET_VAR 21
+
+#define ACT_DISABLE_CLOCK_ROLLBACK_CHECKING 24
+
+#define ACT_DISABLE_INTEGRITY_CHECKING 25
 
 /** @name LM-specific actions **/
 //@{

@@ -7,6 +7,8 @@
 #include <cstdarg>
 #include <cstdio>
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
 namespace gs {
 
@@ -695,6 +697,23 @@ struct TCoreDestroy {
 };
 
 static TCoreDestroy s_destroyCoreWhenNotUsed;
+
+
+// Helpers
+
+std::string format_time_t(std::time_t t, const char *format) {
+    std::ostringstream os;
+    os << std::put_time(std::gmtime(&t), format);
+    return os.str();
+}
+
+std::string to_simple_string(time_point_t tp) {
+    return format_time_t(std::chrono::system_clock::to_time_t(tp), "%Y-%h-%d %H:%M:%S");
+}
+
+std::string to_iso_string(time_point_t tp) {
+    return format_time_t(std::chrono::system_clock::to_time_t(tp), "%Y%m%dT%H%M%S");
+}
 
 #if defined(DEBUG) || defined(_DEBUG)
 void DebugMsg(const char *msg) {

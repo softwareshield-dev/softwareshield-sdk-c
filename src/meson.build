@@ -16,7 +16,7 @@ else
     dl_dep = declare_dependency(link_args: ['-ldl'])
 endif
 
-srcs = ['GS_Intf.cpp', 'GS_Ext.cpp', 'GS.cpp', 'GS_Inspector.cpp', 'GS_Action.cpp']
+srcs = ['GS_Intf.cpp', 'GS_Ext.cpp', 'GS.cpp']
 
 lib_softwareshield = static_library('softwareshield-sdk', srcs, dependencies: [dl_dep])
 
