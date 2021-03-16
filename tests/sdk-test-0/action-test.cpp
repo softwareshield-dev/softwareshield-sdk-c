@@ -21,11 +21,11 @@ TEST_CASE("act-0", tag){
     using namespace gs::action;
 
     //style-1    
-    TUnlock().addTo(req1.get(), entity_id);
-    TLock().addTo(req1.get());
+    TUnlock().addTo(*req1, entity_id);
+    TLock().addTo(*req1);
 
-    TSetPeriod(1000).addTo(req1.get());
-    TAddPeriod(2000).addTo(req1.get());
+    TSetPeriod(1000).addTo(*req1);
+    TAddPeriod(2000).addTo(*req1);
 
     //style-2: chained to add multiple actions.
     (*req2).add(TUnlock(), entity_id).add(TLock()).add(TSetPeriod(1000)).add(TAddPeriod(2000));    

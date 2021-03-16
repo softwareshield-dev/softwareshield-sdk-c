@@ -405,9 +405,9 @@ class TAction {
     virtual ~TAction() = default;
     //add this action to a request code and optionally specify the action's target entity.
     //if the target is not specified, the action will be applied to all entities.
-    void addTo(TGSRequest *req) const;
-    void addTo(TGSRequest *req, const char *target_entityid) const;
-    void addTo(TGSRequest *req, TGSEntity* target_entity) const;
+    void addTo(TGSRequest &req) const;
+    void addTo(TGSRequest &req, const char *target_entityid) const;
+    void addTo(TGSRequest &req, TGSEntity* target_entity) const;
 };
 
 /** \brief Request Object
@@ -456,15 +456,15 @@ class TGSRequest : public TGSObject {
     * \return the request object itself for chained api calling
      */
     TGSRequest& add(const TAction& action){
-      action.addTo(this);
+      action.addTo(*this);
       return *this;
     }
     TGSRequest& add(const TAction& action, TGSEntity* entity){
-      action.addTo(this, entity);
+      action.addTo(*this, entity);
       return *this;
     }
     TGSRequest& add(const TAction& action, const char *entityId){
-      action.addTo(this, entityId);
+      action.addTo(*this, entityId);
       return *this;
     }
 

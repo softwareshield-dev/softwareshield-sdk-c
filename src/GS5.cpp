@@ -359,18 +359,18 @@ const char *TGSLicense::actionNames(int index) const {
 }
 
 //TAction
-void TAction::addTo(TGSRequest *req) const {
-    std::unique_ptr<TGSAction> act(req->addAction(id()));
+void TAction::addTo(TGSRequest &req) const {
+    std::unique_ptr<TGSAction> act(req.addAction(id()));
     this->prepare(act.get());
 }
 
-void TAction::addTo(TGSRequest *req, const char *target_entityid) const {
-    std::unique_ptr<TGSAction> act(req->addAction(id(), target_entityid));
+void TAction::addTo(TGSRequest &req, const char *target_entityid) const {
+    std::unique_ptr<TGSAction> act(req.addAction(id(), target_entityid));
     this->prepare(act.get());
 }
 
-void TAction::addTo(TGSRequest *req, TGSEntity* target_entity) const {
-    std::unique_ptr<TGSAction> act(req->addAction(id(), target_entity));
+void TAction::addTo(TGSRequest &req, TGSEntity* target_entity) const {
+    std::unique_ptr<TGSAction> act(req.addAction(id(), target_entity));
     this->prepare(act.get());
 }
 // *************** TGSRequest ***************************
