@@ -13,7 +13,7 @@
 
 namespace gs {
 
-typedef class TGSApp* (* f_createApp)(void);
+typedef class TGSApp *(*f_createApp)(void);
 
 /** 
 *  \brief GS5 Application 
@@ -51,26 +51,26 @@ typedef class TGSApp* (* f_createApp)(void);
 *
 */
 class TGSApp {
-private:
-    TGSCore * _core; ///< local reference to TGSCore single instance
-	static f_createApp s_appCreator;
+  private:
+    TGSCore *_core; ///< local reference to TGSCore single instance
+    static f_createApp s_appCreator;
 
-	static TGSApp * s_app;
-	static TGSApp * s_createApp();
+    static TGSApp *s_app;
+    static TGSApp *s_createApp();
 
-	static void s_appEventCB(unsigned int eventId, void * usrData);
-	static void s_licEventCB(unsigned int eventId, void * usrData);
-	static void s_entityEventCB(unsigned int eventId, TGSEntity* entity, void * usrData);
-	static void s_userEventCB(unsigned int eventId, void * eventData, unsigned int eventDataSize, void * usrData); 
+    static void s_appEventCB(unsigned int eventId, void *usrData);
+    static void s_licEventCB(unsigned int eventId, void *usrData);
+    static void s_entityEventCB(unsigned int eventId, TGSEntity *entity, void *usrData);
+    static void s_userEventCB(unsigned int eventId, void *eventData, unsigned int eventDataSize, void *usrData);
     //Initialize for every game passes
     void init();
     void registerLicenseModels();
 
     //[INTERNAL]
     void OnPassBegin(int ring);
-	void OnPassEnd(int ring);
+    void OnPassEnd(int ring);
 
-protected:
+  protected:
     /**
 	*  \brief Application Initialization
 	*    Callback to let the application initialize itself 
@@ -83,8 +83,8 @@ protected:
     virtual bool OnAppInit();
 
     /** @name Generic Event Handlers */
-	///@{
-	/**
+    ///@{
+    /**
 	*  \brief Generic Application Events Handler
 	*  
 	*  \param evtId Application Event Identifier
@@ -98,7 +98,7 @@ protected:
 	*/
     virtual void OnAppEvent(unsigned int evtId);
 
-	/**
+    /**
 	*  \brief Generic License Events Handler
 	*  
 	*  \param evtId License Event Identifier
@@ -109,7 +109,7 @@ protected:
 	*
 	*/
     virtual void OnLicenseEvent(unsigned int evtId);
-	/**
+    /**
 	*  \brief Generic Entity Events Handler
 	*  
 	*  \param evtId Entity Event Identifier
@@ -118,8 +118,8 @@ protected:
 	*  The method parses the event id and invokes the corresponding event handlers.
 	*  It is recommended that subclass override individual event handlers instead of this one.
 	*/
-    virtual void OnEntityEvent(unsigned int evtId, TGSEntity *entity );
-	/**
+    virtual void OnEntityEvent(unsigned int evtId, TGSEntity *entity);
+    /**
 	* \brief User Event Handker
 	*
 	* \param eventId  User defined event id ( >= GS_USER_EVENT)
@@ -129,13 +129,13 @@ protected:
 	*  The subclass can override this method to handle user defined event
 	*  
 	*/
-	virtual void OnUserEvent(unsigned int eventId, void * eventData, unsigned int eventDataSize){}
-	///@}
+    virtual void OnUserEvent(unsigned int eventId, void *eventData, unsigned int eventDataSize) {}
+    ///@}
 
     /** @name Application Event Handlers */
-	///@{
+    ///@{
 
-	/**
+    /**
 	*  \brief Application Event Handler: Game Starts (EVENT_APP_BEGIN)
 	*
 	*  Called when the game starts and the license has been initialized. The default method does nothing.
@@ -143,17 +143,17 @@ protected:
 	*  LMApp can check the current license status and pop up UI if necessary. If the product has been fully activated,
 	*  you might simply bypass the startup LMApp UI.
 	*/
-    virtual void OnAppBegin();			//EVENT_APP_BEGIN
-	/**
+    virtual void OnAppBegin(); //EVENT_APP_BEGIN
+                               /**
 	*  \brief Application Event Handler: Game Runs (EVENT_APP_RUN)
 	*
 	*  Called when the game's original code starts to run. The default method does nothing.
 	*
 	*  You can start timing or initialize whatever logic needed while game is running.
 	*/
-    virtual void OnAppRun();			//EVENT_APP_RUN
+    virtual void OnAppRun();   //EVENT_APP_RUN
 
-	/**
+    /**
 	*  \brief Application Event Handler: Game Exits (EVENT_APP_END)
 	*
 	*  Called when the game is terminating. The default method does nothing.
@@ -162,8 +162,8 @@ protected:
 	*
 	*  
 	*/
-    virtual void OnAppEnd();			//EVENT_APP_END
-	/**
+    virtual void OnAppEnd();          //EVENT_APP_END
+                                      /**
 	*  \brief Application Event Handler: Clock Rollback Detected (EVENT_APP_CLOCK_ROLLBACK)
 	*
 	*  Called when a clock rollback behavior has been detected. The default method does nothing.
@@ -172,9 +172,9 @@ protected:
 	*  local clock time, for them there is a built-in LM parameter called "rollbackTolerance" to define the maximum time difference tolerable without trigger the clock rollback event.
 	*  
 	*/
-    virtual void OnClockRolledBack();	//EVENT_APP_CLOCK_ROLLBACK
+    virtual void OnClockRolledBack(); //EVENT_APP_CLOCK_ROLLBACK
 
-	/**
+    /**
 	*  \brief Application Event Handler: Clock Rollback Detected (EVENT_APP_INTEGRITY_CORRUPT)
 	*
 	*  Called when a game integrity corruption has been detected. The default method does nothing.
@@ -184,14 +184,14 @@ protected:
 	   - Game binaries has been modified in memory;
 	*  
 	*/
-    virtual void OnIntegrityCorrupted();//EVENT_APP_INTEGRITY_CORRUPT
+    virtual void OnIntegrityCorrupted(); //EVENT_APP_INTEGRITY_CORRUPT
 
-	///@}
+    ///@}
 
-	/** @name License Event Handlers **/
-	///@{
+    /** @name License Event Handlers **/
+    ///@{
 
-	/**
+    /**
 	*  \brief License Event Handler:  (EVENT_LICENSE_NEWINSTALL)
 	*
 	*  Called when a game launches for the first time on the local machine.
@@ -199,8 +199,8 @@ protected:
 	*	This event is triggered before OnAppBegin() when the local license storage is being initialized by gsCore::init(),
 	*	It happens only once for the very first launching of the game. The default method does nothing.
 	*/
-    virtual void OnNewInstall();		//EVENT_LICENSE_NEWINSTALL
-	/**
+    virtual void OnNewInstall();     //EVENT_LICENSE_NEWINSTALL
+                                     /**
 	*  \brief License Event Handler:  (EVENT_LICENSE_LOADING)
 	*
 	*  Called when the game's license is being loaded from local storage.
@@ -209,16 +209,16 @@ protected:
 	*   custom LM status and the internal license model factory has to create a LM instance to parse/deserialize the custom LM data.
 	*	The default method does nothing.
 	*/
-    virtual void OnLicenseLoading();	//EVENT_LICENSE_LOADING
-	/**
+    virtual void OnLicenseLoading(); //EVENT_LICENSE_LOADING
+                                     /**
 	*  \brief License Event Handler:  (EVENT_LICENSE_READY)
 	*
 	*  Called when the game's license has been loaded successfully from local storage.
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnLicenseLoaded();		//EVENT_LICENSE_READY
-	/**
+    virtual void OnLicenseLoaded();  //EVENT_LICENSE_READY
+                                     /**
 	*  \brief License Event Handler:  (EVENT_LICENSE_FAIL)
 	*
 	*  Called when the game's license cannot be loaded from local storage.
@@ -233,14 +233,14 @@ protected:
 
 	*	The default method does nothing.
 	*/
-    virtual void OnLicenseFail();		//EVENT_LICENSE_FAIL
+    virtual void OnLicenseFail();    //EVENT_LICENSE_FAIL
 
-	///@}
+    ///@}
 
-	/** @name Entity Event Handlers **/
-	///@{
+    /** @name Entity Event Handlers **/
+    ///@{
 
-	/**
+    /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_TRY_ACCESS)
 	*
 	*  Called when an entity is going to be accessed. (@see gsBeginAccess) 
@@ -252,8 +252,8 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityAccessStarting(TGSEntity* entity);		//EVENT_ENTITY_TRY_ACCESS
-	/**
+    virtual void OnEntityAccessStarting(TGSEntity *entity); //EVENT_ENTITY_TRY_ACCESS
+                                                            /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACCESS_STARTED)
 	*
 	*  Called when an entity is accessed successfully. (@see gsBeginAccess) 
@@ -265,8 +265,8 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityAccessStarted(TGSEntity* entity);		//EVENT_ENTITY_ACCESS_STARTED
-	/**
+    virtual void OnEntityAccessStarted(TGSEntity *entity);  //EVENT_ENTITY_ACCESS_STARTED
+                                                            /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACCESS_ENDING)
 	*
 	*  Called when an entity accessing is going to an end. (@see gsEndAccess) 
@@ -283,8 +283,8 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityAccessEnding(TGSEntity* entity);		//EVENT_ENTITY_ACCESS_ENDING
-	/**
+    virtual void OnEntityAccessEnding(TGSEntity *entity);   //EVENT_ENTITY_ACCESS_ENDING
+                                                            /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACCESS_ENDED)
 	*
 	*  Called when an entity accessing is over. (@see gsEndAccess) 
@@ -296,9 +296,9 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityAccessEnded(TGSEntity* entity);		//EVENT_ENTITY_ACCESS_ENDED
+    virtual void OnEntityAccessEnded(TGSEntity *entity);    //EVENT_ENTITY_ACCESS_ENDED
 
-	/**
+    /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACCESS_INVALID)
 	*
 	*  Called when an entity accessing becomes invalid.
@@ -339,8 +339,8 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityAccessInvalid(TGSEntity* entity, bool inGame);		//EVENT_ENTITY_ACCESS_INVALID
-	/**
+    virtual void OnEntityAccessInvalid(TGSEntity *entity, bool inGame); //EVENT_ENTITY_ACCESS_INVALID
+                                                                        /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACCESS_HEARTBEAT)
 	*
 	*  Called periodically while an entity is being accessed (in Active status). 
@@ -351,8 +351,8 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityHeartBeat(TGSEntity* entity);			//EVENT_ENTITY_ACCESS_HEARTBEAT
-	/**
+    virtual void OnEntityHeartBeat(TGSEntity *entity);                  //EVENT_ENTITY_ACCESS_HEARTBEAT
+                                                                        /**
 	*  \brief Entity Event Handler:  (EVENT_ENTITY_ACTION_APPLIED)
 	*
 	*  Called when an entity's license status is modified by an action. 
@@ -365,45 +365,45 @@ protected:
 	*
 	*	The default method does nothing.
 	*/
-    virtual void OnEntityActionApplied(TGSEntity* entity);		//EVENT_ENTITY_ACTION_APPLIED
-	///@}
+    virtual void OnEntityActionApplied(TGSEntity *entity);              //EVENT_ENTITY_ACTION_APPLIED
+    ///@}
 
     /**
 	*  \brief Constructor
 	*    Protected constructor to avoid creating TGSApp instance from user code directly. 
 	*/
-	TGSApp();
-	virtual ~TGSApp();
+    TGSApp();
+    virtual ~TGSApp();
 
-public:
-	static TGSApp * getInstance();
-	
-	static void registerApp(f_createApp appCreator);
+  public:
+    static TGSApp *getInstance();
 
-	//------- App Control --------
-	/** @name Application Control **/
-	//@{
-	/**
+    static void registerApp(f_createApp appCreator);
+
+    //------- App Control --------
+    /** @name Application Control **/
+    //@{
+    /**
 	* \brief Exits application gracefully
 	* \param rc Exit Code
 	*  
 	* Stops the game gracefully, the LMApp will get a chance (optionally in the last different game pass for P1S2, P1S3 mode) to render its Exit-UI later.   
 	*/
-	void exitApp(int rc);
-	/**
+    void exitApp(int rc);
+    /**
 	* \brief Terminates application forcefully
 	* \param rc Exit Code
 	*  
 	* Stops the game forcefully; the game terminates immediately without giving a chance to pop up LMApp's Exit-UI, 
 	*/
-	void terminateApp(int rc);
-	/**
+    void terminateApp(int rc);
+    /**
 	* \brief Allow the game code starts to play
 	* 
 	* Indicates to the GS5 kernel that the game code can be executed right now. 
 	*/
-	void playApp();
-	/**
+    void playApp();
+    /**
 	* \brief Replay the game
 	* 
 	* Restarts the game manually from your code, usually after the game has been activated in your LMApp Exit-UI.
@@ -411,8 +411,8 @@ public:
 	* When game restarting, you can improve game player's user experience by bypassing LMApp startup UI and goes directly to the game pass.
 	* \see isRestartedApp()
 	*/
-	void restartApp();
-	/**
+    void restartApp();
+    /**
 	* \brief Pause the game [ Experimental, Windows Only ]
 	* 
 	* Pauses game's thread and hide all its top windows.
@@ -421,8 +421,8 @@ public:
 	*
 	* \see resumeAndExitApp()
 	*/
-	void pauseApp();
-	/**
+    void pauseApp();
+    /**
 	* \brief Resume a paused game and terminate.  [ Experimental, Windows Only ]
 	* 
 	* 
@@ -430,17 +430,14 @@ public:
 	* 
 	* \see pauseApp()
 	*/
-	void resumeAndExitApp();
+    void resumeAndExitApp();
 
+    //@}
 
+    /** @name Application Running Context Query **/
+    //@{
 
-
-	//@}
-	
-	/** @name Application Running Context Query **/
-	//@{
-
-	/**
+    /**
 	* \brief Is First Game Pass?
 	*
 	* \return true if the current pass is the first pass.
@@ -448,7 +445,7 @@ public:
 	* Ref: \ref ExecutionMode
 	*/
     bool isFirstPass();
-	/**
+    /**
 	* \brief Is First Game Pass?
 	*
 	* \return true if the current pass is running the game code
@@ -456,7 +453,7 @@ public:
 	* Ref: \ref ExecutionMode
 	*/
     bool isGamePass();
-	/**
+    /**
 	* \brief Is Last Pass?
 	*
 	* \return true if the current pass is the last game pass.
@@ -465,7 +462,7 @@ public:
 	*/
     bool isLastPass();
 
-	/**
+    /**
 	*  \brief Is the current process exe is the first game exe?
 	*  
 	*  OnAppBegin() is called only when isFirstGameExe() returns true.
@@ -473,7 +470,7 @@ public:
 	*  Ref: \ref Exe-Hopping
 	*/
     bool isFirstGameExe();
-	/**
+    /**
 	*  \brief Is the current process exe is the last game exe?
 	*  
 	*  OnAppEnd() is called only when isLastGameExe() returns true.
@@ -482,43 +479,42 @@ public:
 	*  Ref: \ref Exe-Hopping
 	*/
     bool isLastGameExe();
-	
-	/**
+
+    /**
 	*  \brief Is the current thread the main thread?
 	*  
 	*  \see OnEntityAccessInvalid
 	*/
     bool isMainThread();
-	/**
+    /**
 	*  \brief Is the current process a restarted one?
 	*  
 	*  \see restartApp()
 	*/
-	bool isRestartedApp();
+    bool isRestartedApp();
 
-  /**
+    /**
   * \brief Is the application is launched for the first time ? (Virginal Running)
   *
   *  Returns true only if the application is launched for the very first time after 
   *  installation.
   *
   */
-  bool isFirstLaunched() { return _core->isAppFirstLaunched(); }
-	//@}
+    bool isFirstLaunched() { return _core->isAppFirstLaunched(); }
+    //@}
 
-
-	/**
+    /**
 	* \brief Gets application root directory
 	*/
-	const char* getAppRootPath();
-	/**
+    const char *getAppRootPath();
+    /**
 	* \brief Gets application startup commandline
 	*
 	*  The startup exe of a \ref Exe-Hopping game might be different from the current exe; this function returns the 
 	*  original command line launching the game.
 	*/
-	const char* getAppCommandLine();
-	/**
+    const char *getAppCommandLine();
+    /**
 	* \brief Gets full path to the application startup Exe
 	*
 	*  The startup exe of a \ref Exe-Hopping game might be different from the current exe. it is the first exe started when game launching.
@@ -530,26 +526,25 @@ public:
 		HICON hAppIcon = ExtractIcon(GetModuleHandle(NULL), getAppMainExe(), 0);
 	*  \endcode
 	*/
-	const char* getAppMainExe();
+    const char *getAppMainExe();
 
-
-	/** @name App Session Variables **/
-	//@{
-	/**
+    /** @name App Session Variables **/
+    //@{
+    /**
 	* \brief Write session variable
 	*
 	* Ref: \ref AppVar
 	*/
-	void setSessionVar(const char* name, const char* val);
-	/**
+    void setSessionVar(const char *name, const char *val);
+    /**
 	* \brief Read session variable
 	*
 	* Ref: \ref AppVar
 	*/
-	const char* getSessionVar(const char* name);
-	//@}
+    const char *getSessionVar(const char *name);
+    //@}
 
-	/**
+    /**
 	* \brief Gets Application Title
 	*
 	* \return The game title defined in license project file.  
@@ -557,9 +552,9 @@ public:
 	* This is a simple helper to return TGSCore::productName().
 	* The game title can be used in LMApp UI. 
 	*/
-    const char* getGameTitle(); //Game Iitle
+    const char *getGameTitle(); //Game Iitle
 
-	/** \brief Send User Defined Event (Synchronized event posting)
+    /** \brief Send User Defined Event (Synchronized event posting)
 	*
 	* \param eventId User defined event id ( must >= GS_USER_EVENT )  
 	* \param eventData [Optional] data buffer pointer associated with the event, NULL if no event data   
@@ -567,15 +562,14 @@ public:
 	*
 	* \return none
 	*/
-	void sendUserEvent(unsigned int eventId, void * eventData = NULL, unsigned int eventDataSize = 0);
+    void sendUserEvent(unsigned int eventId, void *eventData = NULL, unsigned int eventDataSize = 0);
 
-	/**
+    /**
 	* \brief Gets pointer to TGSCore instance 
 	* 
 	*  It is a helper function retrieving the private class member \a _core, it is the same as TGSCore::getInstance()
 	*/
-	TGSCore* core(){ return _core; }
-
+    TGSCore *core() { return _core; }
 };
 /** @name APP Macros
 *  
@@ -594,13 +588,14 @@ public:
 
 	\see IMPLEMENT_APP \see GET_APP
 */
-#define DECLARE_APP(clsName) \
-	private:	\
-		static TGSApp * createInstance(){ return new clsName(); }\
-	public:\
-		static void initClass(){\
-			gs::TGSApp::registerApp(clsName::createInstance);\
-		}
+#define DECLARE_APP(clsName)                                  \
+  private:                                                    \
+    static TGSApp *createInstance() { return new clsName(); } \
+                                                              \
+  public:                                                     \
+    static void initClass() {                                 \
+        gs::TGSApp::registerApp(clsName::createInstance);     \
+    }
 
 /**
 *  \brief Implements a TGSApp subclass
@@ -617,12 +612,12 @@ public:
 
 	\see DECLARE_APP, \see GET_APP
 */
-#define IMPLEMENT_APP(clsName) \
-	namespace clsName_ {\
-		struct clsName##Registor {\
-			clsName##Registor(){ clsName::initClass(); }\
-		} clsName##Registor_inst; \
-	}
+#define IMPLEMENT_APP(clsName)                        \
+    namespace clsName_ {                              \
+    struct clsName##Registor {                        \
+        clsName##Registor() { clsName::initClass(); } \
+    } clsName##Registor_inst;                         \
+    }
 
 /**
 * \brief Get TGSApp instance
@@ -636,7 +631,7 @@ public:
   \see DECLARE_APP 
   \see IMPLEMENT_APP
 */
-#define GET_APP(clsName) ((clsName*)TGSApp::getInstance())
+#define GET_APP(clsName) ((clsName *)TGSApp::getInstance())
 
 /**
 * \brief Initialize TGSApp Instance
@@ -654,7 +649,8 @@ public:
 */
 void initApp();
 
-#define GS_INIT_APP  { gs::initApp(); }
+#define GS_INIT_APP \
+    { gs::initApp(); }
 
 ///@}
 
@@ -706,74 +702,75 @@ void initApp();
 * Ref: \ref DLM
 */
 class TGSDynamicLM {
-private:
-	friend class TGSApp; //access to static callbacks
-	static TLicenseHandle WINAPI s_createLM(void * usrData);
-	static bool WINAPI fcb_isValid(void * usrData);
-	static void WINAPI fcb_startAccess(void * usrData);
-	static void WINAPI fcb_finishAccess(void * usrData);
-	static void WINAPI fcb_onAction(TActionHandle hAct, void * usrData);
-	static void WINAPI fcb_onDestroy(void * usrData);
-private:
-    std::auto_ptr<TGSLicense> _lic;
+  private:
+    friend class TGSApp; //access to static callbacks
+    static TLicenseHandle WINAPI s_createLM(void *usrData);
+    static bool WINAPI fcb_isValid(void *usrData);
+    static void WINAPI fcb_startAccess(void *usrData);
+    static void WINAPI fcb_finishAccess(void *usrData);
+    static void WINAPI fcb_onAction(TActionHandle hAct, void *usrData);
+    static void WINAPI fcb_onDestroy(void *usrData);
+
+  private:
+    std::unique_ptr<TGSLicense> _lic;
 
     bool isValid_();
     void startAccess_();
     void finishAccess_();
     void onAction_(TActionHandle hAct);
 
-protected:
+  protected:
     /** Initialize the DLM instance
 	*
 	*  Subclass should override this method to initialize itself (defines LM parameters, etc.)
 	*/
     virtual void init();
 
-	/** @name Define License Model Parameters **/
-	//@{
-	/** Defines String Parameter
+    /** @name Define License Model Parameters **/
+    //@{
+    /** Defines String Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamStr(const char* paramName,  const char* paramInitValue, unsigned int permission);
-	/** Defines 32bit Integer Parameter
+    void defineParamStr(const char *paramName, const char *paramInitValue, unsigned int permission);
+    /** Defines 32bit Integer Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamInt(const char* paramName, int paramInitValue, unsigned int permission);
-	/** Defines 64bit Integer Parameter
+    void defineParamInt(const char *paramName, int paramInitValue, unsigned int permission);
+    /** Defines 64bit Integer Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamInt64(const char* paramName, int64_t paramInitValue, unsigned int permission);
-	/** Defines Boolean Parameter
+    void defineParamInt64(const char *paramName, int64_t paramInitValue, unsigned int permission);
+    /** Defines Boolean Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamBool(const char* paramName, bool paramInitValue,unsigned int permission);
-	/** Defines Float Parameter
+    void defineParamBool(const char *paramName, bool paramInitValue, unsigned int permission);
+    /** Defines Float Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamFloat(const char* paramName, float paramInitValue, unsigned int permission);
-	/** Defines Double Parameter
+    void defineParamFloat(const char *paramName, float paramInitValue, unsigned int permission);
+    /** Defines Double Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value 
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamDouble(const char* paramName, double paramInitValue, unsigned int permission);
-	/** Defines Time Parameter
+    void defineParamDouble(const char *paramName, double paramInitValue, unsigned int permission);
+    /** Defines Time Parameter
 	*  
 	* \param paramName the name of parameter
 	* \param paramInitValue the initial parameter value
@@ -782,17 +779,16 @@ protected:
 	*
 	* \param permission the the parameter access control mask (Ref: \ref LMParamAccessCtl)
 	*/
-    void defineParamTime(const char* paramName, time_t paramInitValue, unsigned int permission);
-	//@}
-
+    void defineParamTime(const char *paramName, time_t paramInitValue, unsigned int permission);
+    //@}
 
     /** @name LM Event handlers 
 	
 		Sub-class overrides these handlers to handle licensing logic events 
 	**/
-	//@{
-	
-	/** 
+    //@{
+
+    /** 
 	* \brief Is License Valid?
 	* 
 	* \return true if the license is still valid.
@@ -803,7 +799,7 @@ protected:
 	* the function implementation should not assume that the startAccess() was called before.
 	*/
     virtual bool isValid();
-	/** 
+    /** 
 	* \brief License starts to work
 	*
 	* Called when the entity the license attached to enters *Active* status. that is, the gsBeginAccess() is called
@@ -812,7 +808,7 @@ protected:
 	* It is a great chance to start any internal timing logic, or initialize local data resources. 
 	*/
     virtual void startAccess();
-	/** 
+    /** 
 	* \brief License stops working
 	*
 	* Called when the entity the license attached to enters *In-Active* status; the gsEndAccess() triggers this event
@@ -820,7 +816,7 @@ protected:
 	* It is a great chance to release any local resources used in licensing logic. 
 	*/
     virtual void finishAccess();
-	/**
+    /**
 	* \brief Action Processing
 	* \param act action being applied
 	*
@@ -829,32 +825,32 @@ protected:
 	* will not see these actions passed in, you only need to deal with LM-specific actions that other action processors do not  
 	* understand.
 	*/
-    virtual void onAction(TGSAction * act);
-	//@}
+    virtual void onAction(TGSAction *act);
+    //@}
 
-	/**
+    /**
 	* @name Constructor and Destructor
 	*
 	* Must be protected to stop developer from creating /destroying LM instance directly
 	*
 	* DLM can only be created and initialized internally by SDK framework.  
 	*/
-	//@{
-	///construcotr
+    //@{
+    ///construcotr
     TGSDynamicLM();
-	///destructor
-	virtual ~TGSDynamicLM();
-	//@}
-public:
-	/**
+    ///destructor
+    virtual ~TGSDynamicLM();
+    //@}
+  public:
+    /**
 	* \brief Gets the proxy TGSLicense object pointer
 	*
 	* The returned TGSLicense object is created automatically when the LM instance is created, it acts as proxy to access LM's parameters.
 	*
 	*/
-	TGSLicense * license(){
-		return _lic.get();
-	}
+    TGSLicense *license() {
+        return _lic.get();
+    }
 };
 
 /** @name Dynamic License Model Macros
@@ -873,14 +869,14 @@ public:
 *  \param licDescription String description of the LM
 *
 */
-#define DECLARE_LM(clsName, licType, licName, licDescription) \
-	private:	\
-		static TGSDynamicLM * createInstance(){ return new clsName(); }\
-	public:\
-		static void initClass(){\
-			gs::registerLM(clsName::createInstance, licType, licName, licDescription);\
-		}
-
+#define DECLARE_LM(clsName, licType, licName, licDescription)                      \
+  private:                                                                         \
+    static TGSDynamicLM *createInstance() { return new clsName(); }                \
+                                                                                   \
+  public:                                                                          \
+    static void initClass() {                                                      \
+        gs::registerLM(clsName::createInstance, licType, licName, licDescription); \
+    }
 
 /**
 *  Implements a License Model subclass
@@ -889,17 +885,17 @@ public:
 *
 *   It must be in a CPP file to make sure the LM subclass is registered to the GS5 kernel.
 */
-#define IMPLEMENT_LM(clsName) \
-	namespace clsName_ {\
-		struct clsName##Registor {\
-			clsName##Registor(){ clsName::initClass();}\
-		} clsName##Registor_inst;  \
-	}
+#define IMPLEMENT_LM(clsName)                         \
+    namespace clsName_ {                              \
+    struct clsName##Registor {                        \
+        clsName##Registor() { clsName::initClass(); } \
+    } clsName##Registor_inst;                         \
+    }
 
 //@}
 
-typedef TGSDynamicLM * (* f_createLM)(void);
-void registerLM(f_createLM createLM, const char* licId, const char* licName, const char* description);
+typedef TGSDynamicLM *(*f_createLM)(void);
+void registerLM(f_createLM createLM, const char *licId, const char *licName, const char *description);
 
-}; //gs
+}; // namespace gs
 #endif
