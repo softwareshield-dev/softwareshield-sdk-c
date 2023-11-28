@@ -545,8 +545,6 @@ namespace gs {
 			{ EVENT_ENTITY_ACTION_APPLIED, "EVENT_ENTITY_ACTION_APPLIED"}
 		};
 
-    if (eventId == -1) return "ALL Events";
-
 		for(unsigned int i = 0; i < sizeof(s_id_names)/sizeof(s_id_names[0]); i++){
 			if(eventId == s_id_names[i].id) return s_id_names[i].name;
 		}
